@@ -1,7 +1,7 @@
 #!/bin/sh
 ##setup command=wget -q "--no-check-certificate" https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
-version=11.8
+version=11.9
 # remove old version
 cp -r /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle /tmp/ > /dev/null 2>&1
 rm -rf /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyboard > /dev/null 2>&1
