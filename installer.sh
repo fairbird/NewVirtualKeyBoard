@@ -12,13 +12,15 @@ rm -rf /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyboard > /dev/n
 echo " ** Download and install NewVirtualKeyBoard ** "
 cd /tmp 
 set -e
+rm -rf *main*
 rm -rf *NewVirtualKeyBoard*
-wget --no-check-certificate --content-disposition https://github.com/fairbird/NewVirtualKeyBoard/archive/refs/heads/main.tar.gz
-tar -xzf NewVirtualKeyBoard-main.tar.gz
+wget --no-check-certificate https://github.com/fairbird/NewVirtualKeyBoard/archive/refs/heads/main.tar.gz
+tar -xzf main.tar.gz
 cp -rf NewVirtualKeyBoard-main/usr /
 cp -f /tmp/kle/* /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle > /dev/null 2>&1
 rm -rf /tmp/kle > /dev/null 2>&1
 rm -rf *NewVirtualKeyBoard*
+rm -rf *main*
 echo
 echo
 set +e
