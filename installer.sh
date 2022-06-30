@@ -16,8 +16,8 @@ rm -rf *main* > /dev/null 2>&1
 rm -rf *NewVirtualKeyBoard* > /dev/null 2>&1
 wget -q "--no-check-certificate" https://github.com/fairbird/NewVirtualKeyBoard/archive/refs/heads/main.tar.gz
 tar -xzf main.tar.gz
-cp -rf NewVirtualKeyBoard-main/usr / > /dev/null 2>&1
-cp -f /tmp/kle/* /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle > /dev/null 2>&1
+cp -rf NewVirtualKeyBoard-main/usr /
+cp -f /tmp/kle/* /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle
 rm -rf /tmp/kle > /dev/null 2>&1
 rm -rf *NewVirtualKeyBoard* > /dev/null 2>&1
 rm -rf *main* > /dev/null 2>&1
@@ -25,6 +25,12 @@ echo
 echo
 set +e
 cd ..
+
+### Check if plugin installed correctly
+if [ ! -d '/usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard' ]; then
+	echo "Some thing wrong .. Plugin not installed"
+	exit 1
+fi
 
 sync
 echo
