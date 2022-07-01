@@ -17,7 +17,9 @@ rm -rf *NewVirtualKeyBoard* > /dev/null 2>&1
 wget -q "--no-check-certificate" https://github.com/fairbird/NewVirtualKeyBoard/archive/refs/heads/main.tar.gz
 tar -xzf main.tar.gz
 cp -r NewVirtualKeyBoard-main/usr /
-cp -f /tmp/kle/* /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle
+if [ -f '/tmp/kle' ]; then
+	cp -f /tmp/kle/* /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle
+fi
 rm -rf /tmp/kle > /dev/null 2>&1
 rm -rf *NewVirtualKeyBoard* > /dev/null 2>&1
 rm -rf *main* > /dev/null 2>&1
