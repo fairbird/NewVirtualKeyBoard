@@ -34,6 +34,12 @@ if [ ! -d '/usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard' ]; 
 	exit 1
 fi
 
+if [ -d /usr/lib/enigma2/python/Plugins/Extensions/SubsSupport ]; then
+	wget "http://tunisia-dreambox.info/TSplugins/NewVirtualKeyBoard/subtitles.py"
+	rm -f /usr/lib/enigma2/python/Plugins/Extensions/SubsSupport/subtitles.py > /dev/null 2>&1
+	mv subtitles.py /usr/lib/enigma2/python/Plugins/Extensions/SubsSupport  > /dev/null 2>&1
+fi
+
 sync
 echo
 echo
