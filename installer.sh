@@ -1,5 +1,5 @@
 #!/bin/bash
-##setup command=wget -q "--no-check-certificate" https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
+##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
 version=11.9
 # remove old version
@@ -14,7 +14,7 @@ cd /tmp
 set -e
 rm -rf *main* >/dev/null 2>&1
 rm -rf *NewVirtualKeyBoard* >/dev/null 2>&1
-wget -q "--no-check-certificate" https://github.com/fairbird/NewVirtualKeyBoard/archive/refs/heads/main.tar.gz
+wget "https://github.com/fairbird/NewVirtualKeyBoard/archive/refs/heads/main.tar.gz"
 tar -xzf main.tar.gz
 cp -r NewVirtualKeyBoard-main/usr /
 if [ -f '/tmp/kle' ]; then
