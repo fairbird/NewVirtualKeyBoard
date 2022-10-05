@@ -6,3 +6,7 @@ To install plugin directly online from telnet be this command ... لتثبيت �
 ```
 wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ```
+This install script for SubsSupport plugin to make compatible with NewVirtualKeyBoard
+```
+wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/subsinstaller.sh -O - | /bin/sh
+```
