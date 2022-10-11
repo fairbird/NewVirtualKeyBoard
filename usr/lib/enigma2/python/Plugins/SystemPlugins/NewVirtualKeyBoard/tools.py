@@ -29,11 +29,11 @@ def getDesktopSize():
 
 def isFHD():
     desktopSize = getDesktopSize()
-    return desktopSize[0] == 1920
+    return desktopSize[0] > 1280 and desktopSize[0] <= 1920
 
 def isHD():
     desktopSize = getDesktopSize()
-    return desktopSize[0] >= 1280 and desktopSize[0] < 1920
+    return desktopSize[0] <= 1280
 
 def getversioninfo():
     currversion = '1.0'

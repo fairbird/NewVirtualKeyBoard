@@ -28,7 +28,7 @@ from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
 
 VER = getversioninfo()
 
-if getDesktop(0).size().width() == 1920:
+if isFHD():
         from Plugins.SystemPlugins.NewVirtualKeyBoard.skins.NewVirtualKeyBoardfhd import *
 else:
         from Plugins.SystemPlugins.NewVirtualKeyBoard.skins.NewVirtualKeyBoard import *
