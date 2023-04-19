@@ -634,7 +634,10 @@ class textInputSuggestions():
                         continue
                     if txt == line:
                         return
-                file.write('\n' + txt)
+                with open(hfile, 'r+') as file:
+                	content = file.read()
+                	file.seek(0)
+                	file.write(txt.rstrip('\r\n') + '\n' + content)
         except:
             print('error writing to history')
 
