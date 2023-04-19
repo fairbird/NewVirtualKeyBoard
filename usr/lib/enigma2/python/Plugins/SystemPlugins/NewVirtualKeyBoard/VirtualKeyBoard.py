@@ -627,8 +627,8 @@ class textInputSuggestions():
                 f.write(txt)
                 f.close()
                 return
-            with open(hfile, 'r+') as file:
-                for line in file:
+            with open(hfile) as f:
+                for line in f:
                     line = line.strip()
                     if line == '':
                         continue
