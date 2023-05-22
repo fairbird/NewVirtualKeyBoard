@@ -41,7 +41,7 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         	if isFHD():
         		self.skin = """
 				<screen name="nvKeyboardSetup" position="center,center" size="1080,356" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s">
-				<widget name="config" position="30,30" size="1020,274" itemHeight="45" font="Regular;30" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
+				<widget name="config" position="30,30" size="1020,274" itemHeight="45" font="Regular;30" secondfont"Regular;28" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
 
 				<ePixmap position="30,315" size="38,38" pixmap="~/images/key_red.png" zPosition="3" transparent="1" alphatest="blend" />
 				<eLabel position="78,315" zPosition="4" size="300,38" valign="center" font="Regular;30" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" text="Cancel" />
