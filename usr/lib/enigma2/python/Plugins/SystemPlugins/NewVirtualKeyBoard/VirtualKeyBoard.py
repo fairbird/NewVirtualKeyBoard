@@ -788,7 +788,7 @@ class kb_layoutComponent:
 
 class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLayoutLanguages):
 
-    def __init__(self, session, title='', text=''):
+    def __init__(self, session, title='', text='', maxSize=False, visible_width=False, type=Input.TEXT):
 
         if isFHD():
                 FONT0 = FONTSSIZE + 36
@@ -1330,7 +1330,7 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
         self['historyheader'] = Label(' ')
         self.header = title if title else _('NewVirtualKeyBoard  V %s' % VER)
         self.startText = text
-        self['text'] = textINput(text=text)
+        self['text'] = textINput(text=text, maxSize=maxSize, visible_width=visible_width, type=type)
         self['header'] = Label(' ')
         self['flag'] = Pixmap()
         self.currentVKLayout = self.defaultKBLAYOUT
