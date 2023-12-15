@@ -18,6 +18,8 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
+
+from Plugins.Plugin import PluginDescriptor
 from datetime import datetime
 import json
 import os
@@ -27,7 +29,8 @@ from threading import Thread
 import traceback
 from twisted.internet.defer import Deferred
 from twisted.web import client
-
+from enigma import eListboxPythonMultiContent, eListbox, gFont, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, RT_HALIGN_CENTER, loadPNG, RT_WRAP, eConsoleAppContainer, eServiceCenter, eServiceReference, getDesktop, loadPic, loadJPG, RT_VALIGN_CENTER, gPixmapPtr, ePicLoad, eTimer
+from ServiceReference import ServiceReference
 from Components.ActionMap import ActionMap, HelpableActionMap
 from Components.ConfigList import ConfigListScreen
 from Components.GUIComponent import GUIComponent
@@ -52,11 +55,11 @@ from Screens.LocationBox import LocationBox
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools import Notifications
-from Tools.Directories import SCOPE_CURRENT_SKIN, SCOPE_SKIN, resolveFilename, \
+from Tools.Directories import SCOPE_CURRENT_SKIN, SCOPE_SKIN, SCOPE_PLUGINS, resolveFilename, pathExists, \
     fileExists
 from Tools.ISO639 import LanguageCodes
 from Tools.LoadPixmap import LoadPixmap
-
+from six.moves import reload_module
 from .compat import eConnectCallback, FileList
 from .e2_utils import messageCB, E2SettingsProvider, MyLanguageSelection, unrar, \
     ConfigFinalText, Captcha, DelayMessageBox, MyConfigList, getFps, fps_float, \
@@ -96,7 +99,6 @@ except ImportError:
 
 if six.PY3:
     long = int
-
 
 # localization function
 
@@ -575,7 +577,7 @@ class SubsSupportEmbedded(object):
     def getCurrentServiceSubtitle(self):
         service = self.session.nav.getCurrentService()
         return service and service.subtitle()
-
+        
     def __serviceChanged(self):
         if self.selected_subtitle:
             self.selected_subtitle = None
@@ -3823,7 +3825,6 @@ class SubsSearchContextMenu(Screen):
     def getSelection(self):
         return self.options[self["context_menu"].index][1]
 
-
 class SubsSearch(Screen):
     if isFullHD():
         skin = """
@@ -3868,14 +3869,18 @@ class SubsSearch(Screen):
             <widget source="key_menu_img" render="Pixmap" pixmap="skin_default/buttons/key_menu.png" position="10,727" size="35,25" transparent="1" alphatest="on" >
                 <convert type="ConditionalShowHide" />
             </widget>
+            <eLabel position="1333,712" size="1335,1" backgroundColor="#999999" />
+            <widget source="key_info_img" render="Pixmap" pixmap="skin_default/buttons/key_info.png" position="1300,727" size="35,25" transparent="1" alphatest="on" >
+                <convert type="ConditionalShowHide" />
+            </widget>
             <ePixmap  pixmap="skin_default/buttons/key_red.png" position="50,727" size="35,25" transparent="1" alphatest="on" />
             <widget source="key_red" render="Label" position = "93,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
             <ePixmap pixmap="skin_default/buttons/key_green.png" position="371,727" size="35,25" transparent="1" alphatest="on" />
             <widget source="key_green" render="Label" position = "414,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
             <ePixmap pixmap="skin_default/buttons/key_yellow.png" position="692,727" size="35,25" transparent="1" alphatest="on" />
             <widget source="key_yellow" render="Label" position = "735,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
-            <ePixmap pixmap="skin_default/buttons/key_blue.png" position="1013,727" size="35,25" transparent="1" alphatest="on" />
-            <widget source="key_blue" render="Label" position = "1056,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
+            <ePixmap pixmap="skin_default/buttons/key_blue.png" position="985,727" size="35,25" transparent="1" alphatest="on" />
+            <widget source="key_blue" render="Label" position = "1035,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
         </screen>
         """
     else:
@@ -3921,6 +3926,10 @@ class SubsSearch(Screen):
             <widget source="key_menu_img" render="Pixmap" pixmap="skin_default/buttons/key_menu.png" position="3,485" size="35,25" transparent="1" alphatest="on" >
                 <convert type="ConditionalShowHide" />
             </widget>
+            <eLabel position="600,475" size="690,1" backgroundColor="#999999" />
+            <widget source="key_info_img" render="Pixmap" pixmap="skin_default/buttons/key_info.png" position="667,485" size="35,25" transparent="1" alphatest="on" >
+                <convert type="ConditionalShowHide" />
+            </widget>
             <ePixmap  pixmap="skin_default/buttons/key_red.png" position="40,485" size="35,25" transparent="1" alphatest="on" />
             <widget source="key_red" render="Label" position = "80, 485" size="120,25" font="Regular;20" halign="left" foregroundColor="white" />
             <ePixmap pixmap="skin_default/buttons/key_green.png" position="205,485" size="35,25" transparent="1" alphatest="on" />
@@ -3928,7 +3937,7 @@ class SubsSearch(Screen):
             <ePixmap pixmap="skin_default/buttons/key_yellow.png" position="365,485" size="35,25" transparent="1" alphatest="on" />
             <widget source="key_yellow" render="Label" position = "405, 485" size="110,25" font="Regular;20" halign="left" foregroundColor="white" />
             <ePixmap pixmap="skin_default/buttons/key_blue.png" position="525,485" size="35,25" transparent="1" alphatest="on" />
-            <widget source="key_blue" render="Label" position = "565, 485" size="110,25" font="Regular;20" halign="left" foregroundColor="white" />
+            <widget source="key_blue" render="Label" position = "565, 485" size="100,25" font="Regular;20" halign="left" foregroundColor="white" />
         </screen> """
 
     def __init__(self, session, seeker, searchSettings, filepath=None, searchTitles=None, resetSearchParams=True, standAlone=False):
@@ -3941,7 +3950,7 @@ class SubsSearch(Screen):
         self.searchExpression = searchTitles[0]
         self.searchTitles = searchTitles
         self.filepath = filepath
-        if self.filepath:
+        if self.filepath:                                         
             self.filepath = urllib.parse.unquote(self.filepath)
         self.isLocalFilepath = filepath and os.path.isfile(filepath) or False
         self.searchTitle = searchSettings.title
@@ -3962,24 +3971,25 @@ class SubsSearch(Screen):
         self["header_provider"] = StaticText(_("Provider"))
         self["header_sync"] = StaticText(_("S"))
         self["subtitles"] = List([])
+        self["key_info_img"] = Boolean() 
         self["key_menu_img"] = Boolean()
         self["key_red"] = StaticText(_("Update"))
         self["key_green"] = StaticText(_("Search"))
-        self["key_yellow"] = StaticText(_("History"))
-        self["key_blue"] = StaticText(_("Settings"))
+        self["key_yellow"] = StaticText(_("History"))    
+        self["key_blue"] = StaticText(_("Settings"))      
         self["okCancelActions"] = ActionMap(["OkCancelActions"],
         {
             "ok": self.keyOk,
             "cancel": self.keyCancel,
         })
-        self["menuActions"] = ActionMap(["ColorActions", "MenuActions"],
+        self["menuActions"] = ActionMap(["ColorActions", "MenuActions", "MovieSelectionActions"],
         {
             "red": self.updateSearchParams,
             "green": self.searchSubs,
             "yellow": self.openDownloadHistory,
             "blue": self.openSettings,
-
             "menu": self.openContextMenu,
+            "showEventInfo": self.eventinfo,
          })
 
         self["listActions"] = ActionMap(["DirectionActions"],
@@ -4031,6 +4041,7 @@ class SubsSearch(Screen):
             "cancel": self.contextMenuCancel,
 
             "menu": self.contextMenuCancel,
+            "showEventInfo": self.contextMenuCancel,
          })
         self["contextMenuActions"].setEnabled(False)
         self.message = Message(self['loadmessage'], self['errormessage'])
@@ -4050,7 +4061,20 @@ class SubsSearch(Screen):
         self.onClose.append(self.message.exit)
         self.onClose.append(self.searchParamsHelper.resetSearchParams)
         self.onClose.append(self.stopSearchSubs)
-        self.onClose.append(self.closeSeekers)
+        self.onClose.append(self.closeSeekers) 
+        
+    def eventinfo(self):         
+        tmdb_file=resolveFilename(SCOPE_PLUGINS, "Extensions/tmdb")
+        if os.path.exists(tmdb_file):
+               from Plugins.Extensions.tmdb import tmdb
+               reload_module(tmdb)
+               s = self.session.nav.getCurrentService()
+               info = s.info()
+               event = info.getEvent(0) # 0 = now, 1 = next
+               name = event and event.getEventName() or ''
+               self.session.open(tmdb.tmdbScreen, name, 2)
+        else:
+               self.session.open(MessageBox, _('Sorry!\ntmdb is not installed on your image'), MessageBox.TYPE_ERROR, timeout=5)
 
     def __getSubtitlesRenderer(self):
         from Components.Sources.Source import Source
@@ -4125,12 +4149,14 @@ class SubsSearch(Screen):
             self["key_yellow"].text = ""
             self["key_blue"].text = ""
             self["key_menu_img"].boolean = False
+            self["key_info_img"].boolean = False
         elif self.__downloading:
             self["key_red"].text = ""
             self["key_green"].text = ""
             self["key_yellow"].text = ""
             self["key_blue"].text = ""
             self["key_menu_img"].boolean = False
+            self["key_info_img"].boolean = False
         else:
             self["key_red"].text = (_("Update"))
             self["key_green"].text = (_("Search"))
@@ -4138,7 +4164,8 @@ class SubsSearch(Screen):
             self["key_blue"].text = (_("Settings"))
             if self["subtitles"].count() > 0:
                 self["key_menu_img"].boolean = True
-
+                self["key_info_img"].boolean = True
+                
     def updateActionMaps(self):
         if self.__searching:
             self["okCancelActions"].setEnabled(False)
