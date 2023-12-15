@@ -3569,7 +3569,7 @@ class SubsSearchDownloadOptions(Screen, ConfigListScreen):
     if isFullHD():
         skin = """
             <screen position="center,center" size="735,525" zPosition="5" >
-                <widget name="config" position="15,15" size="705,165" font="Regular;27" itemHeight="37" zPosition="1" />
+                <widget name="config" position="15,15" size="705,165" zPosition="1" />
                 <eLabel position="12,192" size="711,118" backgroundColor="#ff0000" />
                 <widget source="fname" render="Label" position="15,195" size="705,112" valign="center" halign="center" font="Regular;28" foregroundColor="#ffffff" zPosition="1" />
                 <eLabel position="12,330" size="711,118" backgroundColor="#00ff00" />
@@ -4654,7 +4654,7 @@ class SubsSearchSettings(Screen, ConfigListScreen):
             <widget name="key_yellow" position="424,6" zPosition="1" size="192,57" font="Regular;25" halign="center" valign="center" backgroundColor="#a08500" shadowOffset="-2,-2" shadowColor="black" />
             <widget name="key_blue" position="629,6" zPosition="1" size="192,57" font="Regular;25" halign="center" valign="center" backgroundColor="#18188b" shadowOffset="-2,-2" shadowColor="black" />
             <eLabel position="-1,83" size="835,1" backgroundColor="#999999" />
-            <widget name="config" position="12,96" size="809,228" font="Regular;27" itemHeight="37" scrollbarMode="showOnDemand" />
+            <widget name="config" position="12,96" size="809,228" scrollbarMode="showOnDemand" />
             <widget source="header_name" render="Label" position = "12,340" size="257,32" font="Regular;23" halign="left" foregroundColor="#0xcccccc" />
             <widget source="header_lang" render="Label" position = "282,340" size="231,32" font="Regular;23" halign="left" foregroundColor="#0xcccccc" />
             <widget source="header_state" render="Label" position = "527,340" size="257,32" font="Regular;23" halign="right" foregroundColor="#0xcccccc" />
@@ -4944,13 +4944,13 @@ class SubsSearchParamsMenu(Screen, ConfigListScreen):
                 <widget source="sourceTitleInfo" render="Label" position="%d,%d" size="%d,%d" halign="center" font="Regular;%d" foregroundColor="#66BFFF" />
                 <widget source="sourceTitle" render="Label" position="%d,%d" size="%d,%d" halign="center" valign="center" font="Regular;%d" />
                 <eLabel position="%d,%d" size="%d,%d" backgroundColor="#999999" />
-                <widget name="config" position="%d,%d" size="%d,%d" font="Regular;%d" itemHeight="%d" scrollbarMode="showOnDemand" />
+                <widget name="config" position="%d,%d" size="%d,%d" scrollbarMode="showOnDemand" />
             </screen>""" % (
                     windowPos[0], windowPos[1], windowSize[0], windowSize[1],
                     sourceTitleInfoPos[0], sourceTitleInfoPos[1], sourceTitleInfoSize[0], sourceTitleInfoSize[1], sourceTitleInfoFont,
                     sourceTitlePos[0], sourceTitlePos[1], sourceTitleSize[0], sourceTitleSize[1], sourceTitleFont,
                     separatorPos[0], separatorPos[1], separatorSize[0], separatorSize[1],
-                    configPos[0], configPos[1], configSize[0], configSize[1], configFont, configItemHeight
+                    configPos[0], configPos[1], configSize[0], configSize[1]
                     )
         Screen.__init__(self, session)
         ConfigListScreen.__init__(self, [], session=session)
