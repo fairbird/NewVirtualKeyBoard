@@ -41,7 +41,7 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         	if isFHD():
         		self.skin = """
 				<screen name="nvKeyboardSetup" position="center,center" size="1080,400" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s" flags="wfNoBorder">
-    				<widget source="Title" render="Label" position="0,0" size="1076,50" itemHeight="30" font="Regular;20" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
+    				<widget source="Title" render="Label" position="0,0" size="1076,50" itemHeight="40" font="Regular;35" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
 	
 				<widget name="config" position="30,55" size="1020,298" itemHeight="45" font="Regular;30" secondfont="Regular;28" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
 
@@ -74,7 +74,7 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         	if isFHD():
         		self.skin = """
 				<screen name="nvKeyboardSetup" position="center,center" size="1080,400" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s" flags="wfNoBorder">
-    				<widget source="Title" render="Label" position="0,0" size="1076,50" itemHeight="30" font="Regular;20" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
+    				<widget source="Title" render="Label" position="0,0" size="1076,50" itemHeight="40" font="Regular;35" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
 	
 				<widget name="config" position="30,55" size="1020,298" itemHeight="45" font="Regular;30" secondfont="Regular;28" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
 
