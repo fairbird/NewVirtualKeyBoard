@@ -76,7 +76,7 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
 				<screen name="nvKeyboardSetup" position="center,center" size="1080,400" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s" flags="wfNoBorder">
     				<widget source="Title" render="Label" position="0,0" size="1076,50" font="Regular;35" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
 	
-				<widget name="config" position="30,55" size="1020,298" font="Regular;30" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
+				<widget name="config" position="30,55" size="1020,298" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
 
 				<ePixmap position="30,360" size="38,38" pixmap="~/images/key_red.png" zPosition="3" transparent="1" alphatest="blend" />
 				<eLabel position="78,360" zPosition="4" size="300,38" valign="center" font="Regular;30" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" text="Cancel" />
@@ -92,7 +92,7 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
 				<screen name="nvKeyboardSetup" position="center,center" size="720,280" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s" flags="wfNoBorder">
     				<widget source="Title" render="Label" position="0,0" size="720,50" font="Regular;20" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
 	
-				<widget name="config" position="20,60" size="680,182" font="Regular;20" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
+				<widget name="config" position="20,60" size="680,182" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
 
 				<ePixmap position="20,250" size="25,25" pixmap="~/images/key_red_sd.png" zPosition="3" transparent="1" alphatest="blend" />
 				<eLabel position="52,250" zPosition="4" size="200,25" valign="center" font="Regular;20" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" text="Cancel" />
