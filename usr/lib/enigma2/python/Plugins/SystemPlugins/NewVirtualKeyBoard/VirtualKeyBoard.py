@@ -2403,4 +2403,4 @@ colors = {
     'color4': gRGB(int('979697', 0x10)),  # grey
 }
 
-VirtualKeyBoard = NewVirtualKeyBoard
+VirtualKeyBoard = VirtualKeyboard = NewVirtualKeyBoard
