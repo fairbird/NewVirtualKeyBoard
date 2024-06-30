@@ -2202,7 +2202,8 @@ KbLayouts = [
     ('Swedish', 'sv_SE', '0000041d'),
     ('Thai Kedmanee', 'th_TH', '0000041e'),
     ('Turkish', 'tr_TR', '0000041f'),
-    ('Ukrainian', 'uk_UA', '00020422')
+    ('Ukrainian', 'uk_UA', '00020422'),
+    ('Chinese', 'zh_CN', '00000404')
 ]
 
 
