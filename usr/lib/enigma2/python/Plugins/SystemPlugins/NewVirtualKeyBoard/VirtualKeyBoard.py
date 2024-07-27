@@ -2029,11 +2029,13 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
         self.input_updated()
 
     def input_updated(self):
-        #if self['text'].text == self.beforeUpdateText:
-        #    return
-        #else:
-        #    self.beforeUpdateText = self['text'].text
-        self.updateGHSuggestions()
+        if self.showsuggestion is False:
+        	if self['text'].text == self.beforeUpdateText:
+            		return
+        	else:
+            		self.beforeUpdateText = self['text'].text
+        else:
+        	self.updateGHSuggestions()
 
     def updateGHSuggestions(self):
         if not self['text'].text:
