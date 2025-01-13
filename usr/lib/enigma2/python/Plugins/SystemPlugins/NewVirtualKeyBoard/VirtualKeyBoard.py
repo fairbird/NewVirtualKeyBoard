@@ -788,7 +788,7 @@ class kb_layoutComponent:
 
 class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLayoutLanguages):
 
-    def __init__(self, session, title='', text='', maxSize=False, visible_width=False, type=Input.TEXT):
+    def __init__(self, session, title='', text='', maxSize=False, visible_width=False, visibleWidth=False, type=Input.TEXT):
 
         if isFHD():
                 FONT0 = FONTSSIZE + 36
