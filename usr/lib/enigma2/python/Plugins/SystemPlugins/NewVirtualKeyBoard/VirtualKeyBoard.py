@@ -172,14 +172,14 @@ class languageSelectionList(GUIComponent, object):
         width = self.l.getItemSize().width()
         height = self.l.getItemSize().height()
         y = (height - 16) / 2
-        png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/hd40/grey18.png")
+        png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/fhd/grey18.png")
         try:
             id = str(item['val'][2])
             if os.path.exists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/kle/") + id + ".kle"):
-                png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/hd40/green18.png")
+                png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/fhd/green18.png")
                 res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHABLEND, 3, y, 16, 16, loadPNG(png)))
             else:
-                png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/hd40/grey18.png")
+                png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/fhd/grey18.png")
                 res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHABLEND, 3, y, 16, 16, loadPNG(png)))
             res.append((eListboxPythonMultiContent.TYPE_TEXT, 40, 0, width - 4, height, 1, RT_HALIGN_LEFT | RT_VALIGN_CENTER, str(item['val'][0])))
         except Exception:
