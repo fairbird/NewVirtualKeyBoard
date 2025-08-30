@@ -58,8 +58,7 @@ else:
 vkLayoutDir = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/kle/")
 
 # external kle layout files
-#ServerUrl = 'http://tunisia-dreambox.info/TSplugins/NewVirtualKeyBoard/kle/'
-ServerUrl = 'https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/kle/'
+ServerUrl = 'https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/fix/kle/'
 
 # keyboardlayout website
 # http://kbdlayout.info/
@@ -281,8 +280,13 @@ class KBLayoutLanguages():
                 try:
                     from ast import literal_eval
                     import codecs
-                    with codecs.open(filePath, encoding='utf-16') as f:
-                        data = f.read()
+                    # Try UTF-16 first, fall back to UTF-8 if it fails
+                    try:
+                        with codecs.open(filePath, encoding='utf-16') as f:
+                            data = f.read()
+                    except UnicodeDecodeError:
+                        with codecs.open(filePath, encoding='utf-8') as f:
+                            data = f.read()
                     data = literal_eval(data)
                     if data['id'] != KBLayoutId:
                         vkLayoutItem = self.getKeyboardLayoutItem(KBLayoutId)
