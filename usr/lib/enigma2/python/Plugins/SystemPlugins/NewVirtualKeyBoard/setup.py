@@ -247,8 +247,7 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
     def checkupdates(self):
         try:
                 from twisted.web.client import getPage, error
-                #url = b"http://tunisia-dreambox.info/TSplugins/NewVirtualKeyBoard/installer.sh"
-                url = b"https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh"
+                url = b"https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/fix/installer.sh"
                 getPage(url,timeout=10).addCallback(self.parseData).addErrback(self.errBack)
         except Exception as error:
                 trace_error()
@@ -258,27 +257,45 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
 
     def parseData(self, data):
         if PY3:
-                data = data.decode("utf-8")
+        	data = data.decode("utf-8")
         else:
-                data = data.encode("utf-8")
+        	data = data.encode("utf-8")
+
         if data:
-                lines = data.split("\n")
-                for line in lines:
-                       if line.startswith("version"):
-                          self.new_version = line.split("=")[1]
-                          break
-        if float(VER) == float(self.new_version) or float(VER)>float(self.new_version):
-                logdata("Updates","No new version available")
-        else :
-                new_version = self.new_version
-                self.session.openWithCallback(self.install, MessageBox, _('%s %s %s.\n\n%s.' % (title14, new_version, title15, title16)), MessageBox.TYPE_YESNO)
+        	lines = data.split("\n")
+        	desc_started = False
+        	desc_lines = []
+        	for line in lines:
+        		line = line.strip()
+        		if line.startswith("version"):
+        			self.new_version = line.split("=")[1].strip('"')
+        		elif line.startswith("description="):
+        			desc_started = True
+        			first_part = line.split("=", 1)[1].lstrip('"')
+        			if first_part.endswith('"'):
+        				# description is in one line only
+        				self.new_description = first_part.rstrip('"')
+        				desc_started = False
+        			else:
+        				desc_lines.append(first_part)
+        		elif desc_started:
+        			if line.endswith('"'):
+        				desc_lines.append(line.rstrip('"'))
+        				desc_started = False
+        				self.new_description = "\n".join(desc_lines)
+        			else:
+        				desc_lines.append(line)
+        if float(VER) >= float(self.new_version):
+        	logdata("Updates", "No new version available")
+        else:
+        	new_description = self.new_description
+        	self.session.openWithCallback(self.install, MessageBox, _('%s %s %s.\n\n%s\n\n%s.' % (title14, self.new_version, title15, new_description, title16)), MessageBox.TYPE_YESNO)
 
     def install(self,answer=False):
         try:
                 if answer:
                         cmdlist = []
-                        #cmd="wget http://tunisia-dreambox.info/TSplugins/NewVirtualKeyBoard/installer.sh -O - | /bin/sh"
-                        cmd="wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh"
+                        cmd="wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/fix/installer.sh -O - | /bin/sh"
                         cmdlist.append(cmd)
                         self.session.open(Console, title='%s' % title17, cmdlist=cmdlist, finishedCallback=self.myCallback, closeOnSuccess=False)
         except:
