@@ -1,7 +1,17 @@
 #!/bin/bash
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
-version=13.1
+version="13.1"
+description="What is NEW :
+-fix 1
+-Fix 2
+-update
+**************************
+ما هو الجديد :
+-اصلاح 1
+-1 تحديث
+-تحديث"
+
 # remove old version
 cp -r /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle /tmp/ >/dev/null 2>&1
 rm -rf /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyboard >/dev/null 2>&1
