@@ -3,14 +3,13 @@
 ###########
 version="13.1"
 description="What is NEW :
--fix 1
--Fix 2
--update
-**************************
+Some fix codes
+Add langauge selection option for plugin
+********************
 ما هو الجديد :
--اصلاح 1
--1 تحديث
--تحديث"
+إصلاح بعض الاكواد
+إصافة خيار اختيار نوع اللغة للبلجن
+"
 
 # remove old version
 cp -r /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle /tmp/ >/dev/null 2>&1
