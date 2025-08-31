@@ -247,7 +247,7 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
     def checkupdates(self):
         try:
                 from twisted.web.client import getPage, error
-                url = b"https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/fix/installer.sh"
+                url = b"https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh"
                 getPage(url,timeout=10).addCallback(self.parseData).addErrback(self.errBack)
         except Exception as error:
                 trace_error()
@@ -295,7 +295,7 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         try:
                 if answer:
                         cmdlist = []
-                        cmd="wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/fix/installer.sh -O - | /bin/sh"
+                        cmd="wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh"
                         cmdlist.append(cmd)
                         self.session.open(Console, title='%s' % title17, cmdlist=cmdlist, finishedCallback=self.myCallback, closeOnSuccess=False)
         except:
