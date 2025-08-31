@@ -2,8 +2,7 @@
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
 version="13.1"
-description="
-What is NEW :
+description="What is NEW :
 Some fix codes
 Add langauge selection option for plugin
 **********************
