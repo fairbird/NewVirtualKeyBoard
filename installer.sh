@@ -4,12 +4,12 @@
 version="13.2"
 description="
 What is NEW :
-Some fix codes
-Add langauge selection option for plugin
+- Some fix codes
+- Add langauge selection option for plugin
 
 ما هو الجديد :
-إصلاح بعض الاكواد
-إصافة خيار اختيار نوع اللغة للبلجن
+- إصلاح بعض الاكواد
+- إصافة خيار اختيار نوع اللغة للبلجن
 "
 
 # remove old version
