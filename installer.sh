@@ -6,7 +6,7 @@ description="
 What is NEW :
 Some fix codes
 Add langauge selection option for plugin
-********************
+
 ما هو الجديد :
 إصلاح بعض الاكواد
 إصافة خيار اختيار نوع اللغة للبلجن
