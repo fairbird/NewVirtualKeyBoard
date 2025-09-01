@@ -24,6 +24,7 @@ from Tools.LoadPixmap import LoadPixmap
 #from skin import loadSkin
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
+from Plugins.SystemPlugins.NewVirtualKeyBoard.setup import *
 
 VER = getversioninfo()
 
@@ -43,27 +44,14 @@ else:
     from urllib import quote as compat_quote
     from urllib2 import urlopen as compat_urlopen
 
-#if isFHD():
-#    skin_xml = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/NewVirtualKeyBoardfhd.xml")
-#else:
-#    skin_xml = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/NewVirtualKeyBoard.xml")
-
-#if os.path.exists(skin_xml):
-#    loadSkin(skin_xml)
-#    pass
-#else:
-#    print('skin.xml is not present')
-
 # local saved kle layout files
 vkLayoutDir = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/kle/")
 
 # external kle layout files
-#ServerUrl = 'http://tunisia-dreambox.info/TSplugins/NewVirtualKeyBoard/kle/'
-ServerUrl = 'https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/kle/'
+ServerUrl = 'https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/fix/kle/'
 
 # keyboardlayout website
 # http://kbdlayout.info/
-
 
 # saved search history
 hfile = '/etc/history'
@@ -172,14 +160,14 @@ class languageSelectionList(GUIComponent, object):
         width = self.l.getItemSize().width()
         height = self.l.getItemSize().height()
         y = (height - 16) / 2
-        png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/hd40/grey18.png")
+        png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/fhd/grey18.png")
         try:
             id = str(item['val'][2])
             if os.path.exists(resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/kle/") + id + ".kle"):
-                png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/hd40/green18.png")
+                png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/fhd/green18.png")
                 res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHABLEND, 3, y, 16, 16, loadPNG(png)))
             else:
-                png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/hd40/grey18.png")
+                png = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/icons/menus/fhd/grey18.png")
                 res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHABLEND, 3, y, 16, 16, loadPNG(png)))
             res.append((eListboxPythonMultiContent.TYPE_TEXT, 40, 0, width - 4, height, 1, RT_HALIGN_LEFT | RT_VALIGN_CENTER, str(item['val'][0])))
         except Exception:
@@ -281,8 +269,13 @@ class KBLayoutLanguages():
                 try:
                     from ast import literal_eval
                     import codecs
-                    with codecs.open(filePath, encoding='utf-16') as f:
-                        data = f.read()
+                    # Try UTF-16 first, fall back to UTF-8 if it fails
+                    try:
+                        with codecs.open(filePath, encoding='utf-16') as f:
+                            data = f.read()
+                    except UnicodeDecodeError:
+                        with codecs.open(filePath, encoding='utf-8') as f:
+                            data = f.read()
                     data = literal_eval(data)
                     if data['id'] != KBLayoutId:
                         vkLayoutItem = self.getKeyboardLayoutItem(KBLayoutId)
@@ -332,17 +325,17 @@ class LanguageListScreen(Screen, KBLayoutLanguages):
 
     def __init__(self, session, listValue=[], selIdx=None, loadVKLayout_callback=None):
         if isFHD():
-                        self.skin =  '''
-                                <screen name="LanguageListScreen" position="center,center" size="900,760" backgroundColor="#16000000" transparent="0" title="Select Language">
-                                <widget name="languageList" position="0,0" size="900,700" backgroundColor="#3f4450" transparent="0" scrollbarMode="showOnDemand" />
-                                <widget name="info" zPosition="2" position="center,710" size="900,40" transparent="0" noWrap="1" font="Regular;30" valign="center" halign="center" foregroundColor="#ffffff" backgroundColor="#0f64b2" />
-                                </screen>'''
+        	self.skin =  '''
+        		<screen name="LanguageListScreen" position="center,center" size="900,760" backgroundColor="#16000000" transparent="0" title="Select Language">
+        		<widget name="languageList" position="0,0" size="900,700" backgroundColor="#3f4450" transparent="0" scrollbarMode="showOnDemand" />
+        		<widget name="info" zPosition="2" position="center,710" size="900,40" transparent="0" noWrap="1" font="Regular;30" valign="center" halign="center" foregroundColor="#ffffff" backgroundColor="#0f64b2" />
+        		</screen>'''
         else:
-                        self.skin =  '''
-                                <screen name="LanguageListScreen" position="center,center" size="600,506" backgroundColor="#16000000" transparent="0" title="Select Language">
-                                <widget name="languageList" position="0,0" size="600,466" backgroundColor="#3f4450" transparent="0" scrollbarMode="showOnDemand" />
-                                <widget name="info" zPosition="2" position="center,473" size="600,26" transparent="0" noWrap="1" font="Regular;20" valign="center" halign="center" foregroundColor="#ffffff" backgroundColor="#0f64b2" />
-                                </screen>'''
+        	self.skin =  '''
+        		<screen name="LanguageListScreen" position="center,center" size="600,506" backgroundColor="#16000000" transparent="0" title="Select Language">
+        		<widget name="languageList" position="0,0" size="600,466" backgroundColor="#3f4450" transparent="0" scrollbarMode="showOnDemand" />
+        		<widget name="info" zPosition="2" position="center,473" size="600,26" transparent="0" noWrap="1" font="Regular;20" valign="center" halign="center" foregroundColor="#ffffff" backgroundColor="#0f64b2" />
+        		</screen>'''
         Screen.__init__(self, session)
         self.loadVKLayout_callback = loadVKLayout_callback
         KBLayoutLanguages.__init__(self, LoadVKLayout_callback=self.loadVKLayout_callback)
@@ -363,7 +356,7 @@ class LanguageListScreen(Screen, KBLayoutLanguages):
         return
 
     def settitle(self):
-        self.setTitle(_("Language selection"))
+        self.setTitle(_("%s" % title38))
         self.showLanguageList()
 
     def listselectionChanged(self):
@@ -371,9 +364,9 @@ class LanguageListScreen(Screen, KBLayoutLanguages):
         id = cur['val'][2]
         langFile = str(vkLayoutDir) + str(id) + ".kle"
         if pathExists(langFile):
-            self['info'].setText(_('Press ok to remove language'))
+            self['info'].setText(_('%s' % title18))
         else:
-            self['info'].setText(_('Press ok to install language'))
+            self['info'].setText(_('%s' % title19))
 
     def showLanguageList(self, index=None):
         self.languageList.setList(self.listValue)
@@ -395,7 +388,7 @@ class LanguageListScreen(Screen, KBLayoutLanguages):
         if pathExists(langFile):
             os.remove(langFile)
             self.showLanguageList(index)
-            self['info'].setText(_('Language removed from installed package'))
+            self['info'].setText(_('%s' % title20))
             activeKBLayoutId = self.getActive_keylayout()
             if activeKBLayoutId == KBLayoutId:
                 KBLayoutId = self.getDefault_KBLayout()
@@ -407,10 +400,10 @@ class LanguageListScreen(Screen, KBLayoutLanguages):
             ret = self.downloadKBlayout(KBLayoutId)
             if ret:
                 self.showLanguageList(index)
-                self['info'].setText(_('Language downloaded successfully ,exit to install'))
+                self['info'].setText(_('%s' % title21))
                 self.setActive_Layout(KBLayoutId)
             else:
-                self['info'].setText(_('Failed to download language,try later'))
+                self['info'].setText(_('%s' % title22))
 
     def exit(self):
         self.close()
@@ -1046,9 +1039,8 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
                         <widget name="suggestionheader" position="1491,21" size="339,72" font="Regular;30" foregroundColor="#ffffff" backgroundColor="#3f434f"  noWrap="1" valign="center" halign="center" transparent="0" zPosition="2" />
                         <widget name="suggestionList" position="1491,114" size="339,429" backgroundColor="#3f434f" enableWrapAround="1" scrollbarMode="showOnDemand" transparent="0" zPosition="1" />
       
-                        <eLabel position="450,547" size="882,38" font="Regular;{4}" text="New Virtual Keyboard - Original code SamSamSam (e2iplayer). Contributors: mfaraj57 (tsmedia) and Fairbird, madmax88 (linuxsat-support). Skin and amends: KiddaC" 
-        foregroundColor="#ffffff" backgroundColor="#000000" valign="center" transparent="1" />
-                        </screen>'''.format(FONT0, FONT1, FONT2, FONT3, FONT4)
+                        <eLabel position="450,547" size="882,38" font="Regular;{4}" text="{5}" foregroundColor="#ffffff" backgroundColor="#000000" valign="center" transparent="1" />
+                        </screen>'''.format(FONT0, FONT1, FONT2, FONT3, FONT4, title23)
         else:
                 self.skin = '''
                         <screen name="NewVirtualKeyBoard" position="center,317" size="1280,420" title="E2iStream virtual keyboard" backgroundColor="#34000000" flags="wfNoBorder">
@@ -1293,9 +1285,8 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
                         <widget name="suggestionheader" position="994,14" size="226,48" font="Regular;20" foregroundColor="#ffffff" backgroundColor="#3f434f"  noWrap="1" valign="center" halign="center" transparent="0" zPosition="2" />
                         <widget name="suggestionList" position="994,76" size="226,286" backgroundColor="#3f434f" enableWrapAround="1" scrollbarMode="showOnDemand" transparent="0" zPosition="1" />
        
-                        <eLabel position="300,364" size="588,25" font="Regular;{4}" text="New Virtual Keyboard - Original SamSamSam (e2iplayer). Contributors: mfaraj57 (tsmedia) and Fairbird, madmax88 (linuxsat-support). Skin: KiddaC" 
-        foregroundColor="#ffffff" backgroundColor="#000000" valign="center" transparent="1" />
-                        </screen>'''.format(FONT0, FONT1, FONT2, FONT3, FONT4)
+                        <eLabel position="300,364" size="588,25" font="Regular;{4}" text="{5}" foregroundColor="#ffffff" backgroundColor="#000000" valign="center" transparent="1" />
+                        </screen>'''.format(FONT0, FONT1, FONT2, FONT3, FONT4, title23)
 
         self.session = session
         self.focus_constants()
@@ -1382,9 +1373,9 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
         self.setTitle(_('New Virtual Keyboard'))
         self['header'].setText(self.header)
         self['historyList'].setSelectionState(False)
-        self['historyheader'].setText('Search history')
+        self['historyheader'].setText('%s' % title24)
         self['suggestionList'].setSelectionState(False)
-        self['suggestionheader'].setText('Google suggestions')
+        self['suggestionheader'].setText('%s' % title25)
         self.setSuggestionVisible()
         self.isshowsuggestionEnabled = self.showsuggestion
         self.setText(self.startText)
@@ -1753,7 +1744,7 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
             leftList.setList([(x, ) for x in self.searchHistoryList])
             leftList.moveToIndex(0)
             leftList.show()
-            self['historyheader'].setText(_('Search history'))
+            self['historyheader'].setText(_('%s' % title26))
             self['historyheader'].show()
 
     def hideLefList(self):
@@ -2031,9 +2022,9 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
     def input_updated(self):
         if self.showsuggestion is False:
         	if self['text'].text == self.beforeUpdateText:
-            		return
+        		return
         	else:
-            		self.beforeUpdateText = self['text'].text
+        		self.beforeUpdateText = self['text'].text
         else:
         	self.updateGHSuggestions()
 
@@ -2067,9 +2058,9 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
 
         def getmenuData():
             menuData = []
-            menuData.append((0, 'Install language', 'flag'))
-            menuData.append((1, 'Clear history', 'history'))
-            menuData.append((2, 'Settings', 'settings'))
+            menuData.append((0, '%s' % title27, 'flag'))
+            menuData.append((1, '%s' % title28, 'history'))
+            menuData.append((2, '%s' % title29, 'settings'))
             return menuData
 
         def optionsback(index=None):
@@ -2082,7 +2073,7 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
             if index == 1:
                 self.clearSearchHistory()
                 self['historyList'].setList([])
-        self.session.openWithCallback(optionsback, vkOptionsScreen, _('select task'), getmenuData())
+        self.session.openWithCallback(optionsback, vkOptionsScreen, _('%s' % title30), getmenuData())
         return
 
     def settings_back(self, result=None):
@@ -2094,12 +2085,12 @@ class NewVirtualKeyBoard(Screen, textInputSuggestions, kb_layoutComponent, KBLay
 
         def getmenuData():
             menuData = []
-            menuData.append((0, 'Yellow - Switch language', 'key_yellow'))
-            menuData.append((1, 'Blue - Toggle focus between suggestions & keyboard', 'key_blue'))
-            menuData.append((2, 'Menu - Show more functions - Install languages...', 'key_menu'))
-            menuData.append((3, 'Info - Show this screen again', 'key_info'))
-            menuData.append((4, 'Page Up - Insert space', 'key_plus'))
-            menuData.append((5, 'Page Down - Clear input text', 'key_minus'))
+            menuData.append((0, '%s' % title31, 'key_yellow'))
+            menuData.append((1, '%s' % title32, 'key_blue'))
+            menuData.append((2, '%s' % title33, 'key_menu'))
+            menuData.append((3, '%s' % title34, 'key_info'))
+            menuData.append((4, '%s' % title35, 'key_plus'))
+            menuData.append((5, '%s' % title36, 'key_minus'))
             return menuData
 
         def optionsback(index=None):

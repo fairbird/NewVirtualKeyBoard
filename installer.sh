@@ -1,7 +1,17 @@
 #!/bin/bash
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
-version=13.1
+version="13.2"
+description="
+What is NEW :
+- Some fix codes
+- Add langauge selection option for plugin
+
+ما هو الجديد :
+- إصلاح بعض الاكواد
+- إصافة خيار اختيار نوع اللغة للبلجن
+"
+
 # remove old version
 cp -r /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle /tmp/ >/dev/null 2>&1
 rm -rf /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyboard >/dev/null 2>&1
