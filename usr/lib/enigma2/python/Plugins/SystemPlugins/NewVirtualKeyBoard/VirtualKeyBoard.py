@@ -48,7 +48,7 @@ else:
 vkLayoutDir = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/kle/")
 
 # external kle layout files
-ServerUrl = 'https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/fix/kle/'
+ServerUrl = 'https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/kle/'
 
 # keyboardlayout website
 # http://kbdlayout.info/
