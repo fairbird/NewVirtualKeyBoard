@@ -26,7 +26,8 @@ config.NewVirtualKeyBoard.lang = ConfigSelection(default="EN", choices = [
 	("AR", "عربي"),
 	("EL", "Ελληνικά"),
 	("DE", "Deutsch"),
-	("CN", "中國人")
+	("CN", "中國人"),
+	("FR", "française")
 	])
 
 if config.NewVirtualKeyBoard.lang.value == "EN":
@@ -39,6 +40,8 @@ elif config.NewVirtualKeyBoard.lang.value == "DE":
 	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.de import *
 elif config.NewVirtualKeyBoard.lang.value == "CN":
 	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.zh import *
+elif config.NewVirtualKeyBoard.lang.value == "FR":
+	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.fr import *
 else:
 	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.en import *
 #############
@@ -312,7 +315,3 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         
     def myCallback(self,result):
         return
-
-
-
-
