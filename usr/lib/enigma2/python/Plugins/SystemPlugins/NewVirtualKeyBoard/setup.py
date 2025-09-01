@@ -274,13 +274,13 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         	for line in lines:
         		line = line.strip()
         		if line.startswith("version"):
-        			self.new_version = line.split("=")[1].strip('"')
+        			self.new_version = line.split("=")[1].strip('"').strip().strip('"').strip("'")
         		elif line.startswith("description="):
         			desc_started = True
         			first_part = line.split("=", 1)[1].lstrip('"')
         			if first_part.endswith('"'):
         				# description is in one line only
-        				self.new_description = first_part.rstrip('"')
+        				self.new_description = first_part.rstrip('"').strip().strip('"').strip("'")
         				desc_started = False
         			else:
         				desc_lines.append(first_part)
@@ -309,5 +309,6 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         
     def myCallback(self,result):
         return
+
 
 
