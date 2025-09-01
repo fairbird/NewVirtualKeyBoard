@@ -2,6 +2,7 @@
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
 version=13.2
+
 description="
 What is NEW :
 - Some fix codes
