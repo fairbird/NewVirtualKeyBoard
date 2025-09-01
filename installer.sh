@@ -1,15 +1,15 @@
 #!/bin/bash
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
-version="13.2"
+version="13.3"
 description="
 What is NEW :
 - Some fix codes
-- Add langauge selection option for plugin
+- Add more langauge suppot
 
 ما هو الجديد :
 - إصلاح بعض الاكواد
-- إصافة خيار اختيار نوع اللغة للبلجن
+- إصافة المزيد من دعم اللغة
 "
 
 # remove old version
