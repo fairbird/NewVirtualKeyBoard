@@ -6,6 +6,11 @@ from Components.config import config
 
 from Plugins.SystemPlugins.NewVirtualKeyBoard.setup import *
 from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
+from Plugins.SystemPlugins.NewVirtualKeyBoard.language_config import initialize_config
+
+# Initialize and save configuration
+initialize_config(config)
+configfile.save()
 
 def main(session, **kwargs):
 	from .setup import nvKeyboardSetup

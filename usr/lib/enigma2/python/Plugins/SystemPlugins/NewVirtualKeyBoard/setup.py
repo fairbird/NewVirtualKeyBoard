@@ -17,22 +17,19 @@ from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 
 from Plugins.SystemPlugins.NewVirtualKeyBoard.Console import Console
 from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
-from Plugins.SystemPlugins.NewVirtualKeyBoard.language_loader import *
+from Plugins.SystemPlugins.NewVirtualKeyBoard.language_config import initialize_config, import_language
+
 VER = getversioninfo()
 
-# Load configuration file explicitly
-configfile.load()
+############# language
+# Initialize configuration first
+initialize_config(config)
 
-# Initialize configuration
+# Import language module
+lang_module = import_language(config.NewVirtualKeyBoard.lang.value)
+globals().update(vars(lang_module))
+#############
 config.NewVirtualKeyBoard = ConfigSubsection()
-config.NewVirtualKeyBoard.lang = ConfigSelection(default="EN", choices=[
-    ("EN", "English"),
-    ("AR", "عربي"),
-    ("EL", "Ελληνικά"),
-    ("DE", "Deutsch"),
-    ("CN", "中國人"),
-    ("FR", "française")
-])
 config.NewVirtualKeyBoard.keys_layout = ConfigText(default='', fixed_size=False)
 config.NewVirtualKeyBoard.lastsearchText = ConfigText(default='%s' % title1, fixed_size=False)
 config.NewVirtualKeyBoard.firsttime = ConfigYesNo(default=True)
@@ -303,3 +300,5 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         
     def myCallback(self,result):
         return
+
+
