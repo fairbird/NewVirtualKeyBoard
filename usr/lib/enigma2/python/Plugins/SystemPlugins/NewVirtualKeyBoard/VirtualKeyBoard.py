@@ -24,7 +24,14 @@ from Tools.LoadPixmap import LoadPixmap
 #from skin import loadSkin
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
-from Plugins.SystemPlugins.NewVirtualKeyBoard.language_loader import *
+from Plugins.SystemPlugins.NewVirtualKeyBoard.language_config import initialize_config, import_language
+
+# Initialize configuration
+initialize_config(config)
+
+# Import language module
+lang_module = import_language(config.NewVirtualKeyBoard.lang.value)
+globals().update(vars(lang_module))
 
 VER = getversioninfo()
 
@@ -48,7 +55,7 @@ else:
 vkLayoutDir = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/skins/kle/")
 
 # external kle layout files
-ServerUrl = 'https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/kle/'
+ServerUrl = 'https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/fix/kle/'
 
 # keyboardlayout website
 # http://kbdlayout.info/
