@@ -24,7 +24,7 @@ from Tools.LoadPixmap import LoadPixmap
 #from skin import loadSkin
 from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
-from Plugins.SystemPlugins.NewVirtualKeyBoard.setup import *
+from Plugins.SystemPlugins.NewVirtualKeyBoard.language_loader import *
 
 VER = getversioninfo()
 
