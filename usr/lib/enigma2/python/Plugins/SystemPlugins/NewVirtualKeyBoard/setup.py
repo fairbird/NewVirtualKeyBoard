@@ -17,37 +17,22 @@ from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 
 from Plugins.SystemPlugins.NewVirtualKeyBoard.Console import Console
 from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
+from Plugins.SystemPlugins.NewVirtualKeyBoard.language_loader import *
 VER = getversioninfo()
 
-config.NewVirtualKeyBoard = ConfigSubsection()
-############# language
-config.NewVirtualKeyBoard.lang = ConfigSelection(default="EN", choices = [
-	("EN", "English"),
-	("AR", "عربي"),
-	("EL", "Ελληνικά"),
-	("DE", "Deutsch"),
-	("CN", "中國人"),
-	("FR", "française"),
-	("IT", "italiana")
-	])
+# Load configuration file explicitly
+configfile.load()
 
-if config.NewVirtualKeyBoard.lang.value == "EN":
-	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.en import *
-elif config.NewVirtualKeyBoard.lang.value == "AR":
-	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.ar import *
-elif config.NewVirtualKeyBoard.lang.value == "EL":
-	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.el import *
-elif config.NewVirtualKeyBoard.lang.value == "DE":
-	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.de import *
-elif config.NewVirtualKeyBoard.lang.value == "CN":
-	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.zh import *
-elif config.NewVirtualKeyBoard.lang.value == "FR":
-	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.fr import *
-elif config.NewVirtualKeyBoard.lang.value == "IT":
-	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.it import *
-else:
-	from Plugins.SystemPlugins.NewVirtualKeyBoard.language.en import *
-#############
+# Initialize configuration
+config.NewVirtualKeyBoard = ConfigSubsection()
+config.NewVirtualKeyBoard.lang = ConfigSelection(default="EN", choices=[
+    ("EN", "English"),
+    ("AR", "عربي"),
+    ("EL", "Ελληνικά"),
+    ("DE", "Deutsch"),
+    ("CN", "中國人"),
+    ("FR", "française")
+])
 config.NewVirtualKeyBoard.keys_layout = ConfigText(default='', fixed_size=False)
 config.NewVirtualKeyBoard.lastsearchText = ConfigText(default='%s' % title1, fixed_size=False)
 config.NewVirtualKeyBoard.firsttime = ConfigYesNo(default=True)
@@ -318,4 +303,3 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         
     def myCallback(self,result):
         return
-
