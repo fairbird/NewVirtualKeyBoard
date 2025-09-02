@@ -1,17 +1,13 @@
 #!/bin/bash
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
-version="13.5"
+version="13.6"
 description="
 What is NEW :
 - Some fix codes
-- Add more langauge suppot
-- Fix crash on OpenATV
 
 ما هو الجديد :
 - إصلاح بعض الاكواد
-- إصافة المزيد من دعم اللغة
-- OpenATV إصلاح الخطأ على صورة
 "
 
 # remove old version
