@@ -41,4 +41,4 @@ title34="Infó - Képernyő újbóli megjelenítése"
 title35="Page Up - Szóköz beszúrása"
 title36="Page Down - Bevitt szöveg törlése"
 title37="feladat kiválasztása"
-title38="Nyelvválasztás
+title38="Nyelvválasztás"
