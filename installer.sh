@@ -42,10 +42,11 @@ if [ ! -d '/usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard' ]; 
 	exit 1
 fi
 
-if [ -d /usr/lib/enigma2/python/Plugins/Extensions/SubsSupport ]; then
-	wget "https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/subtitles.py"
-	rm -f /usr/lib/enigma2/python/Plugins/Extensions/SubsSupport/subtitles.py >/dev/null 2>&1
-	mv subtitles.py /usr/lib/enigma2/python/Plugins/Extensions/SubsSupport >/dev/null 2>&1
+SubsSupport="/usr/lib/enigma2/python/Plugins/Extensions/SubsSupport"
+if ! grep -q "NewVirtualKeyBoard" "$SubsSupport/subtitles.py"; then
+	echo "Send file"
+	wget -q -O "$SubsSupport/subtitles.py" \
+		"https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/subtitles.py"
 fi
 
 sync
