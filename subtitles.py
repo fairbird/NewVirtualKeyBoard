@@ -55,7 +55,7 @@ from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools import Notifications
 from Tools.Directories import SCOPE_CURRENT_SKIN, SCOPE_SKIN, resolveFilename, \
-    fileExists
+    fileExists, SCOPE_PLUGINS
 from Tools.ISO639 import LanguageCodes
 from Tools.LoadPixmap import LoadPixmap
 
@@ -5226,11 +5226,14 @@ class SubsSearchParamsMenu(Screen, ConfigListScreen):
         self['suggestionActions'].setEnabled(False)
         if resetSearchParams and titleList is not None:
             self.onLayoutFinish.append(self.detectSearchParams)
-       #self.onLayoutFinish.append(self.buildMenu) ### EDit By RAED For NewVirtualKeyBoard
+        ### EDit By RAED For NewVirtualKeyBoard
+        if fileExists(resolveFilename(SCOPE_PLUGINS, 'SystemPlugins/NewVirtualKeyBoard/VirtualKeyBoard.py')):
+        	self.onShown.append(self.onWindowShow)
+        else:
+        	self.onLayoutFinish.append(self.buildMenu)
         self.onLayoutFinish.append(self.setWindowTitle)
         self.onLayoutFinish.append(self.saveAll)
         self.onClose.append(self.removeSuggestionWindows)
-        self.onShown.append(self.onWindowShow) ### EDit By RAED For NewVirtualKeyBoard
 
 ### EDit By RAED For NewVirtualKeyBoard
     def onWindowShow(self):
