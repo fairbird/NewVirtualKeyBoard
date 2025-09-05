@@ -18,8 +18,6 @@
 
 from __future__ import absolute_import
 from __future__ import print_function
-
-from Plugins.Plugin import PluginDescriptor
 from datetime import datetime
 import json
 import os
@@ -27,10 +25,10 @@ import re
 import sys
 from threading import Thread
 import traceback
+from Components.ScrollLabel import ScrollLabel
 from twisted.internet.defer import Deferred
 from twisted.web import client
-from enigma import eListboxPythonMultiContent, eListbox, gFont, RT_HALIGN_LEFT, RT_HALIGN_RIGHT, RT_HALIGN_CENTER, loadPNG, RT_WRAP, eConsoleAppContainer, eServiceCenter, eServiceReference, getDesktop, loadPic, loadJPG, RT_VALIGN_CENTER, gPixmapPtr, ePicLoad, eTimer
-from ServiceReference import ServiceReference
+from Screens.Console import Console
 from Components.ActionMap import ActionMap, HelpableActionMap
 from Components.ConfigList import ConfigListScreen
 from Components.GUIComponent import GUIComponent
@@ -44,6 +42,7 @@ from Components.ServiceEventTracker import ServiceEventTracker
 from Components.Sources.Boolean import Boolean
 from Components.Sources.List import List
 from Components.Sources.StaticText import StaticText
+from Components.config import ConfigPassword
 from Components.config import ConfigSubsection, ConfigSelection, ConfigYesNo, \
     configfile, getConfigListEntry, config, ConfigText, ConfigDirectory, ConfigOnOff, \
     ConfigNothing, ConfigInteger, NoSave, KEY_DELETE, KEY_BACKSPACE, \
@@ -55,11 +54,11 @@ from Screens.LocationBox import LocationBox
 from Screens.MessageBox import MessageBox
 from Screens.Screen import Screen
 from Tools import Notifications
-from Tools.Directories import SCOPE_CURRENT_SKIN, SCOPE_SKIN, SCOPE_PLUGINS, resolveFilename, pathExists, \
+from Tools.Directories import SCOPE_CURRENT_SKIN, SCOPE_SKIN, resolveFilename, \
     fileExists
 from Tools.ISO639 import LanguageCodes
 from Tools.LoadPixmap import LoadPixmap
-from six.moves import reload_module
+
 from .compat import eConnectCallback, FileList
 from .e2_utils import messageCB, E2SettingsProvider, MyLanguageSelection, unrar, \
     ConfigFinalText, Captcha, DelayMessageBox, MyConfigList, getFps, fps_float, \
@@ -100,6 +99,7 @@ except ImportError:
 if six.PY3:
     long = int
 
+
 # localization function
 
 def warningMessage(session, text):
@@ -131,7 +131,7 @@ DEBUG = False
 ALL_LANGUAGES_ENCODINGS = ['utf-8', 'utf-16']
 
 # other encodings, sorted according usage
-CENTRAL_EASTERN_EUROPE_ENCODINGS = ['windows-1250', 'iso-8859-2', 'maclatin2', 'IBM852']
+CENTRAL_EASTERN_EUROPE_ENCODINGS = ['utf-8', 'windows-1250', 'iso-8859-2', 'maclatin2', 'IBM852']
 WESTERN_EUROPE_ENCODINGS = ['windows-1252', 'iso-8859-15', 'macroman', 'ibm1140', 'IBM850']
 RUSSIAN_ENCODINGS = ['windows-1251', 'cyrillic', 'maccyrillic', 'koi8_r', 'IBM866']
 ARABIC_ENCODINGS = ['windows-1256', 'iso-8859-6', 'IBM864']
@@ -207,7 +207,7 @@ def getEmbeddedFontSizeCfg(defaultFontSizeCfg):
 GLOBAL_CONFIG_INIT = False
 
 fontChoiceList = [f for f in getFonts()]
-fontSizeChoiceList = [("%d" % i, "%d px" % i) for i in range(10, 60, 1)]
+fontSizeChoiceList = [("%d" % i, "%d px" % i) for i in range(10, 101, 1)]
 positionChoiceList = [("0", _("top"))]
 positionChoiceList.extend([("%d" % i, "%d %%" % i) for i in range(1, 100, 1)])
 positionChoiceList.append(("100", _("bottom")))
@@ -218,7 +218,7 @@ colorChoiceList = []
 colorChoiceList.append(("ff0000", _("red")))
 colorChoiceList.append(("DCDCDC", _("grey")))
 colorChoiceList.append(("00ff00", _("green")))
-colorChoiceList.append(("ff00ff", _("purple")))
+colorChoiceList.append(("a020f0", _("purple")))
 colorChoiceList.append(("ffff00", _("yellow")))
 colorChoiceList.append(("ffffff", _("white")))
 colorChoiceList.append(("00ffff", _("blue")))
@@ -244,39 +244,44 @@ alphaChoiceList.append(("ff", _("transparent")))
 
 def initGeneralSettings(configsubsection):
     configsubsection.pauseVideoOnSubtitlesMenu = ConfigYesNo(default=True)
-    configsubsection.encodingsGroup = ConfigSelection(default="Central and Eastern Europe", choices=[(e, _(e)) for e in ENCODINGS.keys()])
+    configsubsection.encodingsGroup = ConfigSelection(default="Arabic", choices=[(e, _(e)) for e in ENCODINGS.keys()])
+    configsubsection.settingsBackupPath = ConfigDirectory(default="/etc/enigma2/subssupport")
+    return configsubsection
 
 
 def initExternalSettings(configsubsection):
-    configsubsection.position = ConfigSelection(default="94", choices=positionChoiceList)
+    configsubsection.position = ConfigSelection(default="98", choices=positionChoiceList)
     configsubsection.font = ConfigSubsection()
     configsubsection.font.regular = ConfigSubsection()
-    configsubsection.font.regular.type = ConfigSelection(default=getDefaultFont("regular"), choices=fontChoiceList)
+    configsubsection.font.regular.type = ConfigSelection(default=getDefaultFont("arial"), choices=fontChoiceList)
     configsubsection.font.regular.alpha = ConfigSelection(default="00", choices=alphaChoiceList)
-    configsubsection.font.regular.color = ConfigSelection(default="ffffff", choices=colorChoiceList)
+    configsubsection.font.regular.color = ConfigSelection(default="ffff00", choices=colorChoiceList)
+
     configsubsection.font.italic = ConfigSubsection()
-    configsubsection.font.italic.type = ConfigSelection(default=getDefaultFont("italic"), choices=fontChoiceList)
+    configsubsection.font.italic.type = ConfigSelection(default=getDefaultFont("arial"), choices=fontChoiceList)
     configsubsection.font.italic.alpha = ConfigSelection(default="00", choices=alphaChoiceList)
-    configsubsection.font.italic.color = ConfigSelection(default="ffffff", choices=colorChoiceList)
+    configsubsection.font.italic.color = ConfigSelection(default="ffff00", choices=colorChoiceList)
     configsubsection.font.bold = ConfigSubsection()
-    configsubsection.font.bold.type = ConfigSelection(default=getDefaultFont("bold"), choices=fontChoiceList)
+    configsubsection.font.bold.type = ConfigSelection(default=getDefaultFont("arial"), choices=fontChoiceList)
     configsubsection.font.bold.alpha = ConfigSelection(default="00", choices=alphaChoiceList)
-    configsubsection.font.bold.color = ConfigSelection(default="ffffff", choices=colorChoiceList)
-    configsubsection.font.size = ConfigSelection(default="43", choices=fontSizeChoiceList)
+    configsubsection.font.bold.color = ConfigSelection(default="ffff00", choices=colorChoiceList)
+
+    configsubsection.font.size = ConfigSelection(default="75", choices=fontSizeChoiceList)
     configsubsection.shadow = ConfigSubsection()
     configsubsection.shadow.enabled = ConfigOnOff(default=True)
     configsubsection.shadow.type = ConfigSelection(default="border", choices=[("offset", _("offset")), ("border", _('border'))])
     configsubsection.shadow.color = ConfigSelection(default="000000", choices=colorChoiceList)
-    configsubsection.shadow.size = ConfigSelection(default="2", choices=shadowSizeChoiceList)
+    configsubsection.shadow.size = ConfigSelection(default="3", choices=shadowSizeChoiceList)
     configsubsection.shadow.xOffset = ConfigSelection(default="-3", choices=shadowOffsetChoiceList)
     configsubsection.shadow.yOffset = ConfigSelection(default="-3", choices=shadowOffsetChoiceList)
     configsubsection.background = ConfigSubsection()
-    configsubsection.background.enabled = ConfigOnOff(default=True)
-    configsubsection.background.type = ConfigSelection(default="dynamic", choices=[("dynamic", _("dynamic")), ("static", _("static"))])
-    configsubsection.background.xOffset = ConfigSelection(default="10", choices=backgroundOffsetChoiceList)
-    configsubsection.background.yOffset = ConfigSelection(default="10", choices=backgroundOffsetChoiceList)
+    configsubsection.background.enabled = ConfigOnOff(default=False)
+    configsubsection.background.type = ConfigSelection(default="dynamic", choices=[("dynamic", _("dynamic")), ("static", _("static")), ("fixed", _("fixed"))])
+    configsubsection.background.xOffset = ConfigSelection(default="5", choices=backgroundOffsetChoiceList)
+    configsubsection.background.yOffset = ConfigSelection(default="5", choices=backgroundOffsetChoiceList)
     configsubsection.background.color = ConfigSelection(default="000000", choices=colorChoiceList)
     configsubsection.background.alpha = ConfigSelection(default="80", choices=alphaChoiceList)
+    configsubsection.background.height = ConfigSelection(default="4", choices=["2", "3", "4", "5", "6", "7", "8"])
 
 
 def initEmbeddedSettings(configsubsection):
@@ -326,13 +331,13 @@ def initSearchSettings(configsubsection):
     configsubsection.tvshowProvider = ConfigSelection(default="all", choices=[("all", _("All")), ])
     configsubsection.manualSearch = ConfigYesNo(default=False)
     configsubsection.defaultSort = ConfigSelection(default='lang', choices=[('lang', _("Language")), ('provider', _("Provider"))])
-    configsubsection.saveAs = ConfigSelection(default='version', choices=[('default', _("Default")), ('version', _("Release")), ('video', _("Video filename"))])
+    configsubsection.saveAs = ConfigSelection(default='video', choices=[('default', _("Default")), ('version', _("Release")), ('video', _("Video filename"))])
     configsubsection.saveAsFallback = ConfigSelection(default='version', choices=[('default', _("Default")), ('version', _("Release"))])
     configsubsection.saveTo = ConfigSelection(default='custom', choices=[('custom', _('User defined')), ('video', _('Next to video'))])
     configsubsection.addLangToSubsFilename = ConfigYesNo(default=False)
-    configsubsection.askOverwriteExistingSubs = ConfigYesNo(default=True)
+    configsubsection.askOverwriteExistingSubs = ConfigYesNo(default=False)
     configsubsection.loadSubtitlesAfterDownload = ConfigYesNo(default=True)
-    configsubsection.openParamsDialogOnSearch = ConfigYesNo(default=True)
+    configsubsection.openParamsDialogOnSearch = ConfigYesNo(default=False)
     configsubsection.showProvidersErrorMessage = ConfigYesNo(default=True)
     # session settings
     configsubsection.title = ConfigTextWithSuggestionsAndHistory(configsubsection.history, default="", fixed_size=False)
@@ -508,7 +513,7 @@ class SubsStatusScreen(Screen, HelpableScreen):
 
 
 class SubsSupportStatus(object):
-    def __init__(self, delayStepInMs=200, showDelayInMs=False, statusScreen=None):
+    def __init__(self, delayStepInMs=200, showDelayInMs=False, statusScreen=None, useSubclassKeymap=True):
         assert isinstance(self, SubsSupport), "not derived from SubsSupport!"
         self.__delayStepInMs = delayStepInMs
         self.__showDelayInMs = showDelayInMs
@@ -517,10 +522,13 @@ class SubsSupportStatus(object):
             iPlayableService.evStart: self.__serviceChanged,
             iPlayableService.evEnd: self.__serviceChanged,
         })
-        self["SubsStatusActions"] = HelpableActionMap(self, "SubtitlesActions",
-        {
-            "subtitlesStatus": (self.subsStatus, _("change external subtitles status")),
-        }, -5)
+        # DODANO: useSubclassKeymap ARGUMENT KAKO BI IZBJEGAO SUBSUPPORT KEYMAP U FNCPLAYERU, AKO JE SUBSUPPORT SUBCLASS, STO JE SLUCAJ U FNCPLAYER-U, ALI I MEDIAPLAYERU2
+        # NO OVO NECE UTJECATI NA MEDAPLAYER2 I OSTALE JER JE DEFAULT VALUE ARGUMENTA TRUE, TJ. AKO SE NE POZOVE U TIM PLUGINOVIMA SVE OSTAJE ISTO
+        if useSubclassKeymap:
+            self["SubsStatusActions"] = HelpableActionMap(self, "SubtitlesActions",
+            {
+                "subtitlesStatus": (self.subsStatus, _("change external subtitles status")),
+            }, -5)
         self.onClose.append(self.__closeSubsStatusScreen)
 
     def __serviceChanged(self):
@@ -577,7 +585,7 @@ class SubsSupportEmbedded(object):
     def getCurrentServiceSubtitle(self):
         service = self.session.nav.getCurrentService()
         return service and service.subtitle()
-        
+
     def __serviceChanged(self):
         if self.selected_subtitle:
             self.selected_subtitle = None
@@ -737,7 +745,7 @@ class SubsSupport(SubsSupportEmbedded):
     """
 
     def __init__(self, session=None, subsPath=None, defaultPath=None, forceDefaultPath=False, autoLoad=True,
-                 showGUIInfoMessages=True, embeddedSupport=False, preferEmbedded=False, searchSupport=False, configEntry=None):
+                 showGUIInfoMessages=True, embeddedSupport=False, preferEmbedded=False, searchSupport=False, configEntry=None, useSubclassKeymap=True):
         if session is not None:
             self.session = session
         self.searchSupport = searchSupport
@@ -778,10 +786,14 @@ class SubsSupport(SubsSupportEmbedded):
                 iPlayableService.evEnd: self.__serviceStopped,
                 iPlayableService.evSeekableStatusChanged: self.__seekableStatusChanged,
             })
-            self["SubsActions"] = HelpableActionMap(self, "SubtitlesActions",
-                {
-                "subtitles": (self.subsMenu, _("show subtitles menu")),
-                }, -5)
+
+            # DODANO: useSubclassKeymap ARGUMENT KAKO BI IZBJEGAO SUBSUPPORT KEYMAP U FNCPLAYERU, AKO JE SUBSUPPORT SUBCLASS, STO JE SLUCAJ U FNCPLAYER-U, ALI I MEDIAPLAYERU2
+            # NO OVO NECE UTJECATI NA MEDAPLAYER2 I OSTALE JER JE DEFAULT VALUE ARGUMENTA TRUE, TJ. AKO SE NE POZOVE U TIM PLUGINOVIMA SVE OSTAJE ISTO
+            if useSubclassKeymap:
+                self["SubsActions"] = HelpableActionMap(self, "SubtitlesActions",
+                    {
+                    "subtitles": (self.subsMenu, _("show subtitles menu")),
+                    }, -5)
 
             self.onClose.append(self.exitSubs)
 
@@ -999,14 +1011,21 @@ class SubsSupport(SubsSupportEmbedded):
         if self.__subsScreen:
             self.session.deleteDialog(self.__subsScreen)
             self.__subsScreen = None
+        
+        # DODANO (DEAULT = BEZ TRY). NO PUKNE THIRD-PARTY PLUGIN KAD SE POZOVE OVA FUNKCIJA
+        try:
+            self.__starTimer.stop()
+            del self.__startTimer_conn
+            del self.__starTimer
+        except:
+            pass
 
-        self.__starTimer.stop()
-        del self.__startTimer_conn
-        del self.__starTimer
-
-        self.__checkTimer.stop()
-        del self.__checkTimer_conn
-        del self.__checkTimer
+        try:
+            self.__checkTimer.stop()
+            del self.__checkTimer_conn
+            del self.__checkTimer
+        except:
+            pass
 
         print('[SubsSupport] closing subtitleDisplay')
 
@@ -1083,12 +1102,13 @@ class SubsSupport(SubsSupportEmbedded):
                 warningMessage(self.session, _("Cannot decode subtitles. Try another encoding group"))
             return None, None
         except ParserNotFoundError:
-            if showMessages:
-                warningMessage(self.session, _("Cannot parse subtitles. Not supported subtitles format"))
+            # if showMessages:
+                # warningMessage(self.session, _("Cannot parse subtitles. Not supported subtitles format"))
             return None, None
         except ParseError:
-            if showMessages:
-                warningMessage(self.session, _("Cannot parse subtitles. Invalid subtitles format"))
+            #FOR NOW REMOVE ERROR MSG
+            # if showMessages:
+                # warningMessage(self.session, _("Cannot parse subtitles. Invalid subtitles format"))
             return None, None
         finally:
             self.__firstStart = False
@@ -1213,7 +1233,7 @@ class SubsEmbeddedScreen(Screen):
 
 
 class SubtitlesWidget(GUIComponent):
-    STATE_NO_BACKGROUND, STATE_BACKGROUND = range(2)
+    STATE_NO_BACKGROUND, STATE_BACKGROUND, STATE_FIXED_BACKGROUND = range(3)
 
     def __init__(self, boundDynamic=True, boundXOffset=10, boundYOffset=10, boundSize=None, fontSize=25, positionPercent=94):
         GUIComponent.__init__(self)
@@ -1245,10 +1265,18 @@ class SubtitlesWidget(GUIComponent):
         pass
 
     def calcWidgetYPosition(self):
-        return int((self.desktopSize[1] - self.calcWidgetHeight() - self.boundYOffset) / float(100) * self.positionPercent)
+        return int((self.desktopSize[1] - self.calcWidgetHeight() - self.boundYOffset) / float(100) * self.positionPercent) + 40
 
     def calcWidgetHeight(self):
-        return int(4 * self.font[1] + 15)
+        backgroundType = config.plugins.subtitlesSupport.external.background.type.value  # Get background type
+        
+        if backgroundType == "fixed":
+            heightFactor = int(config.plugins.subtitlesSupport.external.background.height.value)  # Use user setting
+        else:
+            heightFactor = 4  # Default value for dynamic & static
+        
+        return int(heightFactor * self.font[1] + 15)  # Calculate final height
+
 
     def update(self):
         ds = self.desktopSize
@@ -1278,15 +1306,13 @@ class SubtitlesWidget(GUIComponent):
                     self.instance.hide()
                     return
                 if self.boundDynamic:
-                    # hack so empty spaces are part of calculateSize calculation
                     self.instance2.setText(text.replace(' ', '.'))
                     ds = self.desktopSize
                     bs = self.boundSize
                     ws = self.instance2.calculateSize()
                     ws = (ws.width() + self.boundXOffset * 2, ws.height() + self.boundYOffset * 2)
                     wp = self.instance2.position()
-                    wp = (wp.x(), wp.y())
-                    wpy = wp[1] + (bs[1] - ws[1]) / 2
+                    wpy = wp.y() + (bs[1] - ws[1]) / 2
                     wpx = ds[0] / 2 - ws[0] / 2
                     self.instance.resize(eSize(int(ws[0]), int(ws[1])))
                     self.instance.move(ePoint(int(wpx), int(wpy)))
@@ -1299,6 +1325,16 @@ class SubtitlesWidget(GUIComponent):
                 self.instance.setVAlign(self.instance.alignCenter)
                 self.instance.setText(text)
                 self.instance.show()
+            elif self.state == self.STATE_FIXED_BACKGROUND:
+                self.instance.show()
+                self.instance2.setText(text)
+                self.instance2.show()
+                
+                # Ensure the fixed background maintains the correct height
+                bs = self.boundSize = (self.desktopSize[0], self.calcWidgetHeight())
+                self.instance.resize(eSize(int(bs[0]), int(bs[1])))
+                self.instance.move(ePoint(int(self.desktopSize[0] / 2 - bs[0] / 2), int(self.calcWidgetYPosition())))
+
 
     def setPosition(self, percent):
         self.positionPercent = percent
@@ -1318,11 +1354,21 @@ class SubtitlesWidget(GUIComponent):
         self.instance2.setForegroundColor(parseColor(color))
 
     def setBackgroundColor(self, color):
+        backgroundType = config.plugins.subtitlesSupport.external.background.type.value  # Correct config path
         if color[1:3] == "ff":
             self.state = self.STATE_NO_BACKGROUND
+        elif backgroundType == "fixed":  # Check for "fixed" background mode
+            self.state = self.STATE_FIXED_BACKGROUND
+            self.instance.setBackgroundColor(parseColor(color))
+            self.instance.show()  # Ensure background remains visible
         else:
             self.state = self.STATE_BACKGROUND
             self.instance.setBackgroundColor(parseColor(color))
+
+    def setFixedBackgroundHeight(self, height):
+        self.boundSize = (self.desktopSize[0], int(height) * self.font[1] + 15)
+        self.instance.resize(eSize(int(self.boundSize[0]), int(self.boundSize[1])))
+        self.instance.move(ePoint(int(self.desktopSize[0] / 2 - self.boundSize[0] / 2), int(self.calcWidgetYPosition())))
 
     def setBorderColor(self, color):
         self.instance.setBorderColor(parseColor(color))
@@ -1407,14 +1453,21 @@ class SubsScreen(Screen):
         elif self.__shadowType == 'offset' and (xOffset is not None and yOffset is not None):
             self["subtitles"].setShadowOffset(str(-xOffset) + ',' + str(-yOffset), self.scale)
 
-    def setBackground(self, type, alpha, color, xOffset=None, yOffset=None):
+    def setBackground(self, type, alpha, color, xOffset=None, yOffset=None, height=None):
         if type == 'dynamic':
             self["subtitles"].setBoundDynamic(True)
             self["subtitles"].setBoundOffset(xOffset, yOffset)
         else:
             self["subtitles"].setBoundDynamic(False)
+
+        # Apply background color
         color = "#" + alpha + color
         self["subtitles"].setBackgroundColor(color)
+
+        # Apply height only for "fixed" background
+        if type == "fixed" and height:
+            self["subtitles"].setFixedBackgroundHeight(height)
+
 
     def setColor(self, color):
         self.currentColor = color
@@ -1439,6 +1492,7 @@ class SubsScreen(Screen):
             shadowXOffset = shadowYOffset = shadowSize = 0
         backgroundType = self.externalSettings.background.type.getValue()
         backgroundAlpha = self.externalSettings.background.alpha.getValue()
+        backgroundHeight = self.externalSettings.background.height.getValue()
         backgroundColor = self.externalSettings.background.color.getValue()
         backgroundXOffset = self.externalSettings.background.xOffset.getValue()
         backgroundYOffset = self.externalSettings.background.yOffset.getValue()
@@ -1451,7 +1505,7 @@ class SubsScreen(Screen):
 
         self.setPosition(position)
         self.setShadow(shadowType, shadowColor, shadowSize, shadowXOffset, shadowYOffset)
-        self.setBackground(backgroundType, backgroundAlpha, backgroundColor, backgroundXOffset, backgroundYOffset)
+        self.setBackground(backgroundType, backgroundAlpha, backgroundColor, backgroundXOffset, backgroundYOffset, backgroundHeight)
         externalSettings = self.externalSettings
         self.setFonts({
             "regular": {
@@ -1567,7 +1621,11 @@ class SubsEngine(object):
                 self.__seek = service.seek()
         except Exception:
             return
-        r = self.__seek.getPlayPosition()
+        try:
+            r = self.__seek.getPlayPosition()
+        except:
+            return
+
         if r[0]:
             self.__pts = None
         else:
@@ -1822,20 +1880,34 @@ class PanelList(MenuList):
     def __init__(self, list, height=30):
         MenuList.__init__(self, list, False, eListboxPythonMultiContent)
         self.l.setItemHeight(height)
-        self.l.setFont(0, gFont("Regular", 20))
-        self.l.setFont(1, gFont("Regular", 17))
+        if isFullHD():
+            #font0=27
+            font0=28              #DODANO
+            font1=21
+        else:
+            font0=20
+            font1=17
+        self.l.setFont(0, gFont("Regular", font0))
+        self.l.setFont(1, gFont("Regular", font1))
 
 
 def PanelListEntry(name, mode):
     res = [(name, mode)]
-    res.append(MultiContentEntryText(pos=(5, 5), size=(330, 25), font=0, flags=RT_VALIGN_CENTER, text=name))
+    if isFullHD():
+        y=35
+    else:
+        y=25
+    # res.append(MultiContentEntryText(pos=(5, 5), size=(330, y), font=0, flags=RT_VALIGN_CENTER, text=name))
+    # DODANO
+    res.append(MultiContentEntryText(pos=(5, 5), size=(430, y), font=0, flags=RT_VALIGN_CENTER, text=name))
+
     return res
 
 
 def PanelColorListEntry(name, value, colorName, colorValue, sizePanelX):
     res = [(name)]
     res.append(MultiContentEntryText(pos=(0, 5), size=(sizePanelX, 30), font=1, flags=RT_HALIGN_LEFT, text=name, color=colorName))
-    res.append(MultiContentEntryText(pos=(0, 5), size=(sizePanelX, 30), font=1, flags=RT_HALIGN_RIGHT, text=value, color=colorValue))
+    res.append(MultiContentEntryText(pos=(120, 5), size=(sizePanelX, 30), font=1, flags=RT_HALIGN_LEFT, text=value, color=colorValue))
     return res
 
 
@@ -1882,8 +1954,8 @@ class SubsMenu(Screen):
 
         self["title_label"] = Label(_("Currently choosed subtitles"))
         self["subfile_label"] = Label("")
-        self["subfile_list"] = PanelList([], 25)
-        self["menu_list"] = PanelList([], 28)
+        self["subfile_list"] = PanelList([], 32)
+        self["menu_list"] = PanelList([], 35)
         self["copyright"] = Label("")
         # self["copyright"] = Label("created by %s <%s>"%(__author__,__email__))
         self["actions"] = ActionMap(["SetupActions"],
@@ -1893,13 +1965,13 @@ class SubsMenu(Screen):
             }, -2)
 
         self["menuactions"] = ActionMap(["NavigationActions"], {
-			"top": self.top,
-			"pageUp": self.pageUp,
-			"up": self.up,
-			"down": self.down,
-			"pageDown": self.pageDown,
-			"bottom": self.bottom
-		}, -2)
+            "top": self.top,
+            "pageUp": self.pageUp,
+            "up": self.up,
+            "down": self.down,
+            "pageDown": self.pageDown,
+            "bottom": self.bottom
+        }, -2)
 
         self.onLayoutFinish.append(self.initTitle)
         self.onLayoutFinish.append(self.initGUI)
@@ -1947,10 +2019,10 @@ class SubsMenu(Screen):
                 # subInfo.append(PanelColorListEntry(_("State:"),_("not loaded"), 0xDAA520, 0xffff00, 300))
             elif self.encoding and not self.newSelection:
                 # subInfo.append(PanelColorListEntry(_("State:"),_("loaded"), 0xDAA520, 0x00ff00, 300))
-                subInfo.append(PanelColorListEntry(_("Encoding:"), self.encoding, 0xDAA520, 0xffffff, 300))
+                subInfo.append(PanelColorListEntry(_("Encoding:"), self.encoding, 0xDAA520, 0xffffff, 150))
             elif not self.encoding and not self.newSelection:
                 # subInfo.append(PanelColorListEntry(_("State:"),_("not loaded"), 0xDAA520, 0xffff00, 300))
-                subInfo.append(PanelColorListEntry(_("Encoding:"), _("cannot decode"), 0xDAA520, 0xffffff, 300))
+                subInfo.append(PanelColorListEntry(_("Encoding:"), _("cannot decode"), 0xDAA520, 0xffffff, 150))
         else:
             self["subfile_label"].setText(_("None"))
             self["subfile_label"].instance.setForegroundColor(parseColor("#DAA520"))
@@ -1990,6 +2062,7 @@ class SubsMenu(Screen):
             self.cancel()
         elif mode == 'subsoff':
             self.turnOff = True
+            if self.subfile is not None: self.subfile = None
             self.cancel()
 
     def getSearchTitleList(self, sName, sPath):
@@ -2137,6 +2210,7 @@ class SubsSetupExternal(BaseMenuScreen):
                 configList.append(getConfigListEntry(_("Background Y-offset"), externalSettings.background.yOffset))
             configList.append(getConfigListEntry(_("Background color"), externalSettings.background.color))
             configList.append(getConfigListEntry(_("Background transparency"), externalSettings.background.alpha))
+            configList.append(getConfigListEntry(_("Background height"), externalSettings.background.height))
         return configList
 
     def __init__(self, session, externalSettings):
@@ -2184,6 +2258,7 @@ class SubsSetupMainMisc(BaseMenuScreen):
         configList.append(getConfigListEntry("-" * 200, ConfigNothing()))
         configList.extend(SubsSetupExternal.getConfigList(self.subsSettings.external))
         configList.append(getConfigListEntry(_("Encoding"), self.subsSettings.encodingsGroup))
+        configList.append(getConfigListEntry(_("Settings Backup Path"), self.subsSettings.settingsBackupPath))
         configList.append(getConfigListEntry(_("Show expert settings"), self.showExpertSettings))
         if self.showExpertSettings.value:
             engineSettings = self.subsSettings.engine
@@ -2277,26 +2352,43 @@ class SubsSetupGeneral(BaseMenuScreen):
     def __init__(self, session, generalSettings):
         BaseMenuScreen.__init__(self, session, _("General settings"))
         self.generalSettings = generalSettings
-
+        self["okactions"] = ActionMap(["OkActions"],
+        {
+            "okbutton": self.keyOk,
+        }, -1)
     def buildMenu(self):
         self["config"].setList([
             getConfigListEntry(_("Pause video on opening subtitles menu"), self.generalSettings.pauseVideoOnSubtitlesMenu),
             getConfigListEntry(_("Encoding"), self.generalSettings.encodingsGroup),
+            getConfigListEntry(_("Settings Backup Path"), self.generalSettings.settingsBackupPath),
         ])
 
+    def keyOk(self):
+        current = self['config'].getCurrent()[1]
+        if current == self.generalSettings.settingsBackupPath:
+            currentPath = self.generalSettings.settingsBackupPath.value
+            self.session.openWithCallback(self.setSettingsBackupPath, LocationBox, "", "", currentPath)
+    
+    def setSettingsBackupPath(self, settingsBackupPath=None):
+        if settingsBackupPath:
+            self.generalSettings.settingsBackupPath.value = settingsBackupPath
+            self.buildMenu()
 
 def FileEntryComponent(name, absolute=None, isDir=False):
     res = [(absolute, isDir)]
     if isFullHD():
-        res.append((eListboxPythonMultiContent.TYPE_TEXT, 35, 1, 770, 30, 1, RT_HALIGN_LEFT, toString(name)))
+        res.append((eListboxPythonMultiContent.TYPE_TEXT, 48, 5, 1200, 48, 1, RT_HALIGN_LEFT, toString(name)))
     else:
-        res.append((eListboxPythonMultiContent.TYPE_TEXT, 35, 1, 570, 30, 0, RT_HALIGN_LEFT, toString(name)))
+        res.append((eListboxPythonMultiContent.TYPE_TEXT, 35, 5, 570, 30, 0, RT_HALIGN_LEFT, toString(name)))
     if isDir:
         png = LoadPixmap(resolveFilename(SCOPE_CURRENT_SKIN, "extensions/directory.png"))
     else:
         png = LoadPixmap(os.path.join(os.path.dirname(__file__), 'img', 'subtitles.png'))
     if png is not None:
-        res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHATEST, 10, 2, 20, 20, png))
+        if isFullHD():         #DODANO
+            res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHATEST, 10, 10, 38, 38, png))         #DODANO
+        else:         #DODANO
+            res.append((eListboxPythonMultiContent.TYPE_PIXMAP_ALPHATEST, 10, 2, 20, 20, png))
     return res
 
 
@@ -2311,9 +2403,11 @@ class SubFileList(FileList):
             extensions += list(parser.parsing)
         FileList.__init__(self, defaultDir, matchingPattern="(?i)^.*\." + '(' + '|'.join(ext[1:] for ext in extensions) + ')', useServiceRef=False)
         self.l.setFont(0, gFont("Regular", 18))
-        self.l.setFont(1, gFont("Regular", 27))
+        #self.l.setFont(1, gFont("Regular", 27))
+        self.l.setFont(1, gFont("Regular", 29))
         if isFullHD():
-            self.l.setItemHeight(35)
+            #self.l.setItemHeight(35)
+            self.l.setItemHeight(48)                   #DODANO
         else:
             self.l.setItemHeight(23)
 
@@ -3001,6 +3095,7 @@ class SubsSearchProcess(object):
         self.pPayload = None
         self.data = ""
         self.__stopping = False
+        self.mpart = False
         self.appContainer = eConsoleAppContainer()
         self.stdoutAvail_conn = eConnectCallback(self.appContainer.stdoutAvail, self.dataOutCB)
         self.stderrAvail_conn = eConnectCallback(self.appContainer.stderrAvail, self.dataErrCB)
@@ -3010,7 +3105,12 @@ class SubsSearchProcess(object):
         def getMessage(data):
             mSize = int(data[:7])
             mPayload = data[7:mSize]
-            mPart = mSize > len(data)
+            if self.mpart == False:
+                mPart = mSize > len(data)
+            else:
+                mPart = False
+                self.mpart = False
+
             return mSize, mPayload, mPart
 
         def readMessage(payload):
@@ -3074,7 +3174,7 @@ class SubsSearchProcess(object):
     def start(self, params, callbacks):
         self.processes.append(self)
         self.callbacks = callbacks
-        cmd = "python %s" % self.process_path
+        cmd = "python3 %s" % self.process_path
         self.log.debug("start - '%s'", cmd)
         self.appContainer.execute(cmd)
         self.write(params)
@@ -3131,7 +3231,50 @@ class SubsSearchProcess(object):
 
     def dataOutCB(self, data):
         self.log.debug("dataOutCB: '%s", data)
-        self.recieveMessages(data)
+        try:
+            self.mpart = False
+            self.recieveMessages(data)
+        except (AttributeError, TypeError):
+            self.mpart = True
+            # raw = re.findall('(.*?){"message": (.*?), "value": (.*?)}', data)
+            # for size, message, value in raw:
+                # size = size
+                # message = message
+                # value = value
+
+            # value = ''.join(value)
+            # value = value.replace("[", "").replace("]", "")
+            # value = value.split(", ")
+            # if len(value) > 1:
+                # value = value[1]
+            # else:
+                # value = ''.join(value)
+
+            # data = str(size) + '{"message": 5, "value"' + ": " + value + "}"
+
+
+            #DIRTY HACK, FOR NOW
+            ''' DIRTY HACK, FOR NOW '''
+            if type(data) is bytes:
+                data = data.decode("utf-8", "ignore")
+            raw = re.findall('(.*?){"message": (.*?), "value": (.*?)}', data)
+            for size, message, value in raw:
+                value = value.replace("[[", "").replace("]]", "")
+                value = value.split(", ")
+
+            for i in value:
+                if 'lat' in str(i).lower() or "latin" in str(i).lower():
+                    value = str(i)
+                elif not "cyr" in str(i).lower() and not "lat" in str(i).lower() and not "latinica" in str(i).lower():  #1 cirilica sa oznakom cyr i 1 lainica ali bez oznake lat
+                    value = str(i)
+                # elif 'utf-8' in str(i).lower() or 'utf8' in str(i).lower() and not 'lat' in str(i).lower() and not "latin" in str(i).lower():
+                    # value = str(i)
+                # else:
+                    # value = value[0]
+
+            data = str(size) + '{"message": 5, "value"' + ": " + value + "}"
+            self.recieveMessages(data)
+
 
     def finishedCB(self, retval):
         self.processes.remove(self)
@@ -3569,7 +3712,7 @@ class SubsSearchDownloadOptions(Screen, ConfigListScreen):
     if isFullHD():
         skin = """
             <screen position="center,center" size="735,525" zPosition="5" >
-                <widget name="config" position="15,15" size="705,165" zPosition="1" />
+                <widget name="config" position="15,15" size="705,165" font="Regular;27" itemHeight="37" zPosition="1" />
                 <eLabel position="12,192" size="711,118" backgroundColor="#ff0000" />
                 <widget source="fname" render="Label" position="15,195" size="705,112" valign="center" halign="center" font="Regular;28" foregroundColor="#ffffff" zPosition="1" />
                 <eLabel position="12,330" size="711,118" backgroundColor="#00ff00" />
@@ -3825,6 +3968,82 @@ class SubsSearchContextMenu(Screen):
     def getSelection(self):
         return self.options[self["context_menu"].index][1]
 
+class SubsSupportLogScreen(Screen):
+    if isFullHD():
+        skin = """
+        <screen position="center,center" size="1200,700" title="SubsSupport Log" zPosition="10">
+            <widget name="logtext" position="10,10" size="1180,640" font="Regular;28" />
+            <ePixmap pixmap="skin_default/buttons/red.png" position="10,660" size="35,25" transparent="1" alphatest="on" />
+            <widget source="key_red" render="Label" position="50,660" size="150,30" font="Regular;28" halign="left" valign="center" />
+        </screen>
+        """
+    else:
+        skin = """
+        <screen position="center,center" size="800,500" title="SubsSupport Log" zPosition="10">
+            <widget name="logtext" position="10,10" size="780,440" font="Regular;20" />
+            <ePixmap pixmap="skin_default/buttons/red.png" position="10,460" size="35,25" transparent="1" alphatest="on" />
+            <widget source="key_red" render="Label" position="50,460" size="100,25" font="Regular;20" halign="left" valign="center" />
+        </screen>
+        """
+    
+    def __init__(self, session):
+        Screen.__init__(self, session)
+        self.setTitle(_("SubsSupport Log"))
+        self["logtext"] = ScrollLabel()
+        self["key_red"] = StaticText(_("Close"))
+        
+        # Updated ActionMap with scroll controls
+        self["actions"] = ActionMap(["OkCancelActions", "ColorActions", "DirectionActions"],
+        {
+            "ok": self.close,
+            "cancel": self.close,
+            "red": self.close,
+            "left": self.pageUp,
+            "right": self.pageDown,
+            "up": self.pageUp,
+            "down": self.pageDown,
+            "pageUp": self.pageUp,
+            "pageDown": self.pageDown
+        })
+        self.onLayoutFinish.append(self.loadLog)
+
+    def loadLog(self):
+        log_content = ""
+        log_path = "/var/volatile/tmp/subssupport.log"
+        try:
+            if os.path.exists(log_path):
+                with open(log_path, "r") as log_file:
+                    # Read the entire file
+                    full_log = log_file.read()
+                    
+                    # Find the first occurrence of "[SubsSeeker][info]"
+                    start_index = full_log.find("[SubsSeeker][info]")
+                    
+                    if start_index != -1:
+                        # Extract from the first occurrence to the end
+                        log_content = full_log[start_index:]
+                    else:
+                        log_content = _("No SubsSeeker info found in log")
+            else:
+                log_content = _("Log file not found")
+        except Exception as e:
+            log_content = _("Error reading log:") + " " + str(e)
+        
+        self["logtext"].setText(log_content)
+        self["logtext"].lastPage()
+
+    def pageUp(self):
+        self["logtext"].pageUp()
+
+    def pageDown(self):
+        self["logtext"].pageDown()
+
+    def up(self):
+        self["logtext"].instance.moveSelection(self["logtext"].instance.moveUp)
+
+    def down(self):
+        self["logtext"].instance.moveSelection(self["logtext"].instance.moveDown)
+
 class SubsSearch(Screen):
     if isFullHD():
         skin = """
@@ -3869,18 +4088,15 @@ class SubsSearch(Screen):
             <widget source="key_menu_img" render="Pixmap" pixmap="skin_default/buttons/key_menu.png" position="10,727" size="35,25" transparent="1" alphatest="on" >
                 <convert type="ConditionalShowHide" />
             </widget>
-            <eLabel position="1333,712" size="1335,1" backgroundColor="#999999" />
-            <widget source="key_info_img" render="Pixmap" pixmap="skin_default/buttons/key_info.png" position="1300,727" size="35,25" transparent="1" alphatest="on" >
-                <convert type="ConditionalShowHide" />
-            </widget>
             <ePixmap  pixmap="skin_default/buttons/key_red.png" position="50,727" size="35,25" transparent="1" alphatest="on" />
-            <widget source="key_red" render="Label" position = "93,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
+            <widget source="key_red" render="Label" position = "93,722" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
             <ePixmap pixmap="skin_default/buttons/key_green.png" position="371,727" size="35,25" transparent="1" alphatest="on" />
-            <widget source="key_green" render="Label" position = "414,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
+            <widget source="key_green" render="Label" position = "414,722" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
             <ePixmap pixmap="skin_default/buttons/key_yellow.png" position="692,727" size="35,25" transparent="1" alphatest="on" />
-            <widget source="key_yellow" render="Label" position = "735,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
-            <ePixmap pixmap="skin_default/buttons/key_blue.png" position="985,727" size="35,25" transparent="1" alphatest="on" />
-            <widget source="key_blue" render="Label" position = "1035,727" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
+            <widget source="key_yellow" render="Label" position = "735,722" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
+            <ePixmap pixmap="skin_default/buttons/key_blue.png" position="1013,727" size="35,25" transparent="1" alphatest="on" />
+            <widget source="key_blue" render="Label" position = "1056,722" size="268,37" font="Regular;30" halign="left" foregroundColor="white" />
+            <ePixmap pixmap="skin_default/buttons/key_info.png" position="1360,727" size="35,25" transparent="1" alphatest="on" />
         </screen>
         """
     else:
@@ -3926,10 +4142,6 @@ class SubsSearch(Screen):
             <widget source="key_menu_img" render="Pixmap" pixmap="skin_default/buttons/key_menu.png" position="3,485" size="35,25" transparent="1" alphatest="on" >
                 <convert type="ConditionalShowHide" />
             </widget>
-            <eLabel position="600,475" size="690,1" backgroundColor="#999999" />
-            <widget source="key_info_img" render="Pixmap" pixmap="skin_default/buttons/key_info.png" position="667,485" size="35,25" transparent="1" alphatest="on" >
-                <convert type="ConditionalShowHide" />
-            </widget>
             <ePixmap  pixmap="skin_default/buttons/key_red.png" position="40,485" size="35,25" transparent="1" alphatest="on" />
             <widget source="key_red" render="Label" position = "80, 485" size="120,25" font="Regular;20" halign="left" foregroundColor="white" />
             <ePixmap pixmap="skin_default/buttons/key_green.png" position="205,485" size="35,25" transparent="1" alphatest="on" />
@@ -3937,7 +4149,8 @@ class SubsSearch(Screen):
             <ePixmap pixmap="skin_default/buttons/key_yellow.png" position="365,485" size="35,25" transparent="1" alphatest="on" />
             <widget source="key_yellow" render="Label" position = "405, 485" size="110,25" font="Regular;20" halign="left" foregroundColor="white" />
             <ePixmap pixmap="skin_default/buttons/key_blue.png" position="525,485" size="35,25" transparent="1" alphatest="on" />
-            <widget source="key_blue" render="Label" position = "565, 485" size="100,25" font="Regular;20" halign="left" foregroundColor="white" />
+            <widget source="key_blue" render="Label" position = "565, 485" size="110,25" font="Regular;20" halign="left" foregroundColor="white" />
+            <ePixmap pixmap="skin_default/buttons/key_info.png" position="700,485" size="35,25" transparent="1" alphatest="on" />
         </screen> """
 
     def __init__(self, session, seeker, searchSettings, filepath=None, searchTitles=None, resetSearchParams=True, standAlone=False):
@@ -3950,7 +4163,7 @@ class SubsSearch(Screen):
         self.searchExpression = searchTitles[0]
         self.searchTitles = searchTitles
         self.filepath = filepath
-        if self.filepath:                                         
+        if self.filepath:
             self.filepath = urllib.parse.unquote(self.filepath)
         self.isLocalFilepath = filepath and os.path.isfile(filepath) or False
         self.searchTitle = searchSettings.title
@@ -3971,25 +4184,26 @@ class SubsSearch(Screen):
         self["header_provider"] = StaticText(_("Provider"))
         self["header_sync"] = StaticText(_("S"))
         self["subtitles"] = List([])
-        self["key_info_img"] = Boolean() 
         self["key_menu_img"] = Boolean()
+        #self["key_info_img"] = Boolean()
         self["key_red"] = StaticText(_("Update"))
         self["key_green"] = StaticText(_("Search"))
-        self["key_yellow"] = StaticText(_("History"))    
-        self["key_blue"] = StaticText(_("Settings"))      
+        self["key_yellow"] = StaticText(_("History"))
+        self["key_blue"] = StaticText(_("Settings"))
         self["okCancelActions"] = ActionMap(["OkCancelActions"],
         {
             "ok": self.keyOk,
             "cancel": self.keyCancel,
         })
-        self["menuActions"] = ActionMap(["ColorActions", "MenuActions", "MovieSelectionActions"],
+        self["menuActions"] = ActionMap(["ColorActions", "MenuActions", "InfoActions"],
         {
             "red": self.updateSearchParams,
             "green": self.searchSubs,
             "yellow": self.openDownloadHistory,
             "blue": self.openSettings,
+
             "menu": self.openContextMenu,
-            "showEventInfo": self.eventinfo,
+            "info": self.showLogScreen,
          })
 
         self["listActions"] = ActionMap(["DirectionActions"],
@@ -4041,7 +4255,6 @@ class SubsSearch(Screen):
             "cancel": self.contextMenuCancel,
 
             "menu": self.contextMenuCancel,
-            "showEventInfo": self.contextMenuCancel,
          })
         self["contextMenuActions"].setEnabled(False)
         self.message = Message(self['loadmessage'], self['errormessage'])
@@ -4061,20 +4274,10 @@ class SubsSearch(Screen):
         self.onClose.append(self.message.exit)
         self.onClose.append(self.searchParamsHelper.resetSearchParams)
         self.onClose.append(self.stopSearchSubs)
-        self.onClose.append(self.closeSeekers) 
-        
-    def eventinfo(self):         
-        tmdb_file=resolveFilename(SCOPE_PLUGINS, "Extensions/tmdb")
-        if os.path.exists(tmdb_file):
-               from Plugins.Extensions.tmdb import tmdb
-               reload_module(tmdb)
-               s = self.session.nav.getCurrentService()
-               info = s.info()
-               event = info.getEvent(0) # 0 = now, 1 = next
-               name = event and event.getEventName() or ''
-               self.session.open(tmdb.tmdbScreen, name, 2)
-        else:
-               self.session.open(MessageBox, _('Sorry!\ntmdb is not installed on your image'), MessageBox.TYPE_ERROR, timeout=5)
+        self.onClose.append(self.closeSeekers)
+
+    def showLogScreen(self):
+        self.session.open(SubsSupportLogScreen)
 
     def __getSubtitlesRenderer(self):
         from Components.Sources.Source import Source
@@ -4149,23 +4352,23 @@ class SubsSearch(Screen):
             self["key_yellow"].text = ""
             self["key_blue"].text = ""
             self["key_menu_img"].boolean = False
-            self["key_info_img"].boolean = False
+            #self["key_info_img"].boolean = False
         elif self.__downloading:
             self["key_red"].text = ""
             self["key_green"].text = ""
             self["key_yellow"].text = ""
             self["key_blue"].text = ""
             self["key_menu_img"].boolean = False
-            self["key_info_img"].boolean = False
+            #self["key_info_img"].boolean = False
         else:
             self["key_red"].text = (_("Update"))
             self["key_green"].text = (_("Search"))
             self["key_yellow"].text = (_("History"))
             self["key_blue"].text = (_("Settings"))
+            #self["key_info_img"].boolean = True
             if self["subtitles"].count() > 0:
                 self["key_menu_img"].boolean = True
-                self["key_info_img"].boolean = True
-                
+
     def updateActionMaps(self):
         if self.__searching:
             self["okCancelActions"].setEnabled(False)
@@ -4618,6 +4821,7 @@ class SubsSearch(Screen):
         self.session.openWithCallback(openSettingsCB, SubsSearchSettings, self.searchSettings, self.seeker, self.isLocalFilepath)
 
 
+
 class SubsSearchSettings(Screen, ConfigListScreen):
 
     @staticmethod
@@ -4654,7 +4858,7 @@ class SubsSearchSettings(Screen, ConfigListScreen):
             <widget name="key_yellow" position="424,6" zPosition="1" size="192,57" font="Regular;25" halign="center" valign="center" backgroundColor="#a08500" shadowOffset="-2,-2" shadowColor="black" />
             <widget name="key_blue" position="629,6" zPosition="1" size="192,57" font="Regular;25" halign="center" valign="center" backgroundColor="#18188b" shadowOffset="-2,-2" shadowColor="black" />
             <eLabel position="-1,83" size="835,1" backgroundColor="#999999" />
-            <widget name="config" position="12,96" size="809,228" scrollbarMode="showOnDemand" />
+            <widget name="config" position="12,96" size="809,228" font="Regular;27" itemHeight="37" scrollbarMode="showOnDemand" />
             <widget source="header_name" render="Label" position = "12,340" size="257,32" font="Regular;23" halign="left" foregroundColor="#0xcccccc" />
             <widget source="header_lang" render="Label" position = "282,340" size="231,32" font="Regular;23" halign="left" foregroundColor="#0xcccccc" />
             <widget source="header_state" render="Label" position = "527,340" size="257,32" font="Regular;23" halign="right" foregroundColor="#0xcccccc" />
@@ -4891,11 +5095,12 @@ class SubsSearchSettings(Screen, ConfigListScreen):
             err_msg = "unknown error"
             if isinstance(providerError, Exception):
                 if isinstance(providerError, ImportError):
-                    # No module named ...
-                    err_msg = _("missing") + " python-%s " % (providerError.message.split()[-1]) + _("library")
+                    missing_lib = providerError.args[0].split()[-1] if providerError.args else "unknown"
+                    err_msg = _("missing") + f" python-{missing_lib} " + _("library")
                 else:
-                    err_msg = providerError.message
-        msg = "%s: %s" % (provider.provider_name, err_msg)
+                    err_msg = str(providerError)  # Use str() instead of .message
+        
+        msg = f"{provider.provider_name}: {err_msg}"
         self.session.open(MessageBox, msg, MessageBox.TYPE_WARNING, timeout=5)
 
     def openProviderSettings(self, provider):
@@ -4944,13 +5149,13 @@ class SubsSearchParamsMenu(Screen, ConfigListScreen):
                 <widget source="sourceTitleInfo" render="Label" position="%d,%d" size="%d,%d" halign="center" font="Regular;%d" foregroundColor="#66BFFF" />
                 <widget source="sourceTitle" render="Label" position="%d,%d" size="%d,%d" halign="center" valign="center" font="Regular;%d" />
                 <eLabel position="%d,%d" size="%d,%d" backgroundColor="#999999" />
-                <widget name="config" position="%d,%d" size="%d,%d" scrollbarMode="showOnDemand" />
+                <widget name="config" position="%d,%d" size="%d,%d" font="Regular;%d" itemHeight="%d" scrollbarMode="showOnDemand" />
             </screen>""" % (
                     windowPos[0], windowPos[1], windowSize[0], windowSize[1],
                     sourceTitleInfoPos[0], sourceTitleInfoPos[1], sourceTitleInfoSize[0], sourceTitleInfoSize[1], sourceTitleInfoFont,
                     sourceTitlePos[0], sourceTitlePos[1], sourceTitleSize[0], sourceTitleSize[1], sourceTitleFont,
                     separatorPos[0], separatorPos[1], separatorSize[0], separatorSize[1],
-                    configPos[0], configPos[1], configSize[0], configSize[1]
+                    configPos[0], configPos[1], configSize[0], configSize[1], configFont, configItemHeight
                     )
         Screen.__init__(self, session)
         ConfigListScreen.__init__(self, [], session=session)
@@ -5021,7 +5226,7 @@ class SubsSearchParamsMenu(Screen, ConfigListScreen):
         self['suggestionActions'].setEnabled(False)
         if resetSearchParams and titleList is not None:
             self.onLayoutFinish.append(self.detectSearchParams)
-        #self.onLayoutFinish.append(self.buildMenu) ### EDit By RAED For NewVirtualKeyBoard
+       #self.onLayoutFinish.append(self.buildMenu) ### EDit By RAED For NewVirtualKeyBoard
         self.onLayoutFinish.append(self.setWindowTitle)
         self.onLayoutFinish.append(self.saveAll)
         self.onClose.append(self.removeSuggestionWindows)
@@ -5226,7 +5431,251 @@ class SubsSearchProviderMenu(BaseMenuScreen):
         title = toString(provider.provider_name) + " " + _("settings")
         BaseMenuScreen.__init__(self, session, title)
         self.provider = provider
+        if hasattr(provider, 'setSession'):
+            provider.setSession(session)        
+        self.backup_path = "/etc/enigma2/subssupport"        
+        if not os.path.exists(self.backup_path):
+            os.makedirs(self.backup_path, mode=0o755)        
+        self.backup_file = os.path.join(self.backup_path, f"{provider.id}_credentials.json")
+        
+        # Initialize all key labels
+        self["key_red"] = Label(_("Cancel"))
+        self["key_green"] = Label(_("Save"))
+        self["key_blue"] = Label(_("Reset"))
+        self["key_yellow"] = Label("")
+
+        # Create base action map without yellow action
+        action_map = {
+            "cancel": self.keyCancel,
+            "green": self.keySave,
+            "red": self.keyCancel,
+            "blue": self.keyResetDefaults,
+            "menu": self.keyBackup,
+            "info": self.keyRestore
+        }
+
+        # Add yellow action only if credentials exist
+        if self._has_credentials():
+            self["key_yellow"] = Label(_("Test"))
+            self["key_yellow"].show()
+            action_map["yellow"] = self.keyTestCredentials
+        else:
+            self["key_yellow"].hide()
+
+        # Create the ActionMap with the complete action set
+        self["actions"] = ActionMap(["SetupActions", "ColorActions", "MenuActions"], action_map, -2)
+    
+    def _has_credentials(self):
+        """Check if provider has credential settings"""
+        settings = self.provider.settings_provider.getSettingsDict()
+        credential_keys = {'username', 'password', 'api_key', 'token'}
+        return any(key.lower() in str(k).lower() for k in settings for key in credential_keys)
 
     def buildMenu(self):
         settingsProvider = self.provider.settings_provider
         self["config"].setList(settingsProvider.getE2Settings())
+
+    def keyTestCredentials(self):
+        """Yellow button - Test credentials"""
+        if hasattr(self.provider, 'test_credentials'):
+            self.session.openWithCallback(
+                self._testCredentials,
+                MessageBox,
+                _("Testing credentials..."),
+                MessageBox.TYPE_INFO,
+                timeout=3
+            )
+
+    def _testCredentials(self, *args):
+        """Handle credential test result"""
+        from twisted.internet import reactor
+        from functools import partial
+
+        deferred = self.provider.test_credentials()
+        
+        def show_gui_message(session, message, is_error=False):
+            if hasattr(self.provider, 'show_message'):
+                self.provider.show_message(session, message, is_error)
+            else:
+                from Screens.MessageBox import MessageBox
+                try:
+                    session.open(
+                        MessageBox,
+                        message,
+                        MessageBox.TYPE_ERROR if is_error else MessageBox.TYPE_INFO,
+                        timeout=10
+                    )
+                except Exception as e:
+                    print("Failed to show message:", str(e))
+
+        def onSuccess(result):
+            if isinstance(result, dict) and 'user' in result:  # OpenSubtitles response
+                user = result.get('user', {})
+                message = (
+                    _("Login successful!") + "\n\n" +
+                    _("User ID: %s") % user.get('user_id', 'N/A') + "\n" +
+                    _("Level: %s") % user.get('level', 'N/A') + "\n" +
+                    _("VIP: %s") % (_("Yes") if user.get('vip') else _("No")) + "\n" +
+                    _("Downloads left: %s") % user.get('allowed_downloads', 0) + "\n" +
+                    _("Translations left: %s") % user.get('allowed_translations', 0)
+                )
+            else:  # Subdl or other providers
+                message = str(result)
+            
+            reactor.callFromThread(partial(show_gui_message, self.session, message))
+
+        def onError(failure):
+            error_msg = _("Error: %s") % str(failure.value)
+            reactor.callFromThread(partial(show_gui_message, self.session, error_msg, True))
+
+        deferred.addCallbacks(onSuccess, onError)
+
+    def keyResetDefaults(self):
+        """Blue button - Reset to defaults"""
+        for x in self["config"].list:
+            x[1].value = x[1].default
+        self.session.open(
+            MessageBox,
+            _("Settings reset to defaults"),
+            MessageBox.TYPE_INFO,
+            timeout=3
+        )
+
+    def keyBackup(self):
+        """MENU button - Backup credentials"""
+        try:
+            creds = {
+                k: v for k, v in self.provider.settings_provider.getSettingsDict().items()
+                if any(x in k.lower() for x in ['user', 'pass', 'api', 'key', 'token' , 'path'])
+            }
+            
+            with open(self.backup_file, 'w') as f:
+                json.dump(creds, f, indent=4)
+            os.chmod(self.backup_file, 0o600)
+            
+            self.session.open(
+                MessageBox,
+                _("Credentials backed up to:") + f"\n{self.backup_file}",
+                MessageBox.TYPE_INFO,
+                timeout=5
+            )
+        except Exception as e:
+            self.session.open(
+                MessageBox,
+                _("Backup failed:") + f" {str(e)}",
+                MessageBox.TYPE_ERROR,
+                timeout=5
+            )
+
+    def keyRestore(self):
+        """Universal restore that works for ALL providers"""
+        if not os.path.exists(self.backup_file):
+            self.session.open(
+                MessageBox,
+                _("No backup file found"),
+                MessageBox.TYPE_ERROR,
+                timeout=5
+            )
+            return
+
+        try:
+            # Load backup data
+            with open(self.backup_file, 'r') as f:
+                backup_data = json.load(f)
+            
+            # Get ALL config entries regardless of names
+            config_entries = self.provider.settings_provider.getE2Settings()
+            
+            # Restore using SMART matching
+            restored = []
+            for config_entry in config_entries:
+                entry_name = str(config_entry[0])
+                entry_obj = config_entry[1]
+                
+                # Find matching backup key using flexible matching
+                for backup_key, backup_value in backup_data.items():
+                    # Case 1: Exact match (OpenSubtitles)
+                    if backup_key.lower() == entry_name.lower():
+                        entry_obj.value = backup_value
+                        restored.append((entry_name, backup_value))
+                        break
+                    
+                    # Case 2: Partial match (Subdl_API_KEY -> API_KEY)
+                    if (entry_name.lower() in backup_key.lower() or 
+                        backup_key.lower() in entry_name.lower()):
+                        entry_obj.value = backup_value
+                        restored.append((entry_name, backup_value))
+                        break
+                    
+                    # Case 3: Match path-related settings
+                    if any(x in backup_key.lower() for x in ['path', 'dir', 'folder', 'location']):
+                        if isinstance(entry_obj, (ConfigDirectory, ConfigText)):
+                            entry_obj.value = backup_value
+                            restored.append((entry_name, backup_value))
+                            break
+            
+            if not restored:
+                # Final attempt: Match by value type
+                for config_entry in config_entries:
+                    entry_name = str(config_entry[0])
+                    entry_obj = config_entry[1]
+                    
+                    if isinstance(entry_obj, ConfigPassword) and any('pass' in k.lower() for k in backup_data):
+                        key = next(k for k in backup_data if 'pass' in k.lower())
+                        entry_obj.value = backup_data[key]
+                        restored.append((entry_name, "******"))
+                    elif isinstance(entry_obj, ConfigText) and any('api' in k.lower() or 'key' in k.lower() for k in backup_data):
+                        key = next(k for k in backup_data if 'api' in k.lower() or 'key' in k.lower())
+                        entry_obj.value = backup_data[key]
+                        restored.append((entry_name, "******" if 'key' in key.lower() else backup_data[key]))
+                    elif isinstance(entry_obj, (ConfigDirectory, ConfigText)) and \
+                         any(x in k.lower() for k in backup_data for x in ['path', 'dir', 'folder']):
+                        key = next(k for k in backup_data if any(x in k.lower() for x in ['path', 'dir', 'folder']))
+                        entry_obj.value = backup_data[key]
+                        restored.append((entry_name, backup_data[key]))
+            
+            if not restored:
+                self.session.open(
+                    MessageBox,
+                    _("No compatible settings found in backup"),
+                    MessageBox.TYPE_ERROR,
+                    timeout=5
+                )
+                return
+
+            # Save and refresh
+            configfile.save()
+            self.buildMenu()
+
+            # Show detailed success message
+            msg = _("Successfully restored:") + "\n"
+            for name, value in restored:
+                msg += f"{name}: {value}\n"
+
+            self.session.open(
+                MessageBox,
+                msg,
+                MessageBox.TYPE_INFO,
+                timeout=10
+            )
+
+        except Exception as e:
+            self.session.open(
+                MessageBox,
+                _("Restore error:") + f" {str(e)}",
+                MessageBox.TYPE_ERROR,
+                timeout=5
+            )
+
+    def keySave(self):
+        """Green button - Save settings"""
+        for x in self["config"].list:
+            x[1].save()
+        configfile.save()
+        self.close(True)
+
+    def keyCancel(self):
+        """Red button - Cancel"""
+        for x in self["config"].list:
+            x[1].cancel()
+        self.close()
