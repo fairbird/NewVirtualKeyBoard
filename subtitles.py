@@ -5096,11 +5096,11 @@ class SubsSearchSettings(Screen, ConfigListScreen):
             if isinstance(providerError, Exception):
                 if isinstance(providerError, ImportError):
                     missing_lib = providerError.args[0].split()[-1] if providerError.args else "unknown"
-                    err_msg = _("missing") + f" python-{missing_lib} " + _("library")
+                    err_msg = _("missing") + " python-{} ".format(missing_lib) + _("library")
                 else:
                     err_msg = str(providerError)  # Use str() instead of .message
         
-        msg = f"{provider.provider_name}: {err_msg}"
+        msg = provider.provider_name + ": " + err_msg
         self.session.open(MessageBox, msg, MessageBox.TYPE_WARNING, timeout=5)
 
     def openProviderSettings(self, provider):
@@ -5439,7 +5439,7 @@ class SubsSearchProviderMenu(BaseMenuScreen):
         self.backup_path = "/etc/enigma2/subssupport"        
         if not os.path.exists(self.backup_path):
             os.makedirs(self.backup_path, mode=0o755)        
-        self.backup_file = os.path.join(self.backup_path, f"{provider.id}_credentials.json")
+        self.backup_file = os.path.join(self.backup_path, str(provider.id) + "_credentials.json")
         
         # Initialize all key labels
         self["key_red"] = Label(_("Cancel"))
@@ -5558,14 +5558,14 @@ class SubsSearchProviderMenu(BaseMenuScreen):
             
             self.session.open(
                 MessageBox,
-                _("Credentials backed up to:") + f"\n{self.backup_file}",
+                _("Credentials backed up to:") + "\n" + self.backup_file,
                 MessageBox.TYPE_INFO,
                 timeout=5
             )
         except Exception as e:
             self.session.open(
                 MessageBox,
-                _("Backup failed:") + f" {str(e)}",
+                _("Backup failed:") + " " + str(e),
                 MessageBox.TYPE_ERROR,
                 timeout=5
             )
@@ -5653,19 +5653,17 @@ class SubsSearchProviderMenu(BaseMenuScreen):
             # Show detailed success message
             msg = _("Successfully restored:") + "\n"
             for name, value in restored:
-                msg += f"{name}: {value}\n"
-
+                msg += name + ": " + value + "\n"
             self.session.open(
                 MessageBox,
                 msg,
                 MessageBox.TYPE_INFO,
                 timeout=10
             )
-
         except Exception as e:
             self.session.open(
                 MessageBox,
-                _("Restore error:") + f" {str(e)}",
+                _("Restore error:") + " " + str(e),
                 MessageBox.TYPE_ERROR,
                 timeout=5
             )
