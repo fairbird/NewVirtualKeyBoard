@@ -40,13 +40,12 @@ cd ..
 if [ ! -d '/usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard' ]; then
 	echo "Some thing wrong .. Plugin not installed"
 	exit 1
-fi
-
-SubsSupport="/usr/lib/enigma2/python/Plugins/Extensions/SubsSupport"
-if ! grep -q "NewVirtualKeyBoard" "$SubsSupport/subtitles.py"; then
-	echo "Send file"
-	wget -q -O "$SubsSupport/subtitles.py" \
-		"https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/subtitles.py"
+else
+	SubsSupport="/usr/lib/enigma2/python/Plugins/Extensions/SubsSupport"
+	if [ -f "$SubsSupport/subtitles.py" ]; then
+		echo "Send subtitles.py file"
+		wget -q -O "$SubsSupport/subtitles.py" "https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/subtitles.py"
+	fi
 fi
 
 sync
