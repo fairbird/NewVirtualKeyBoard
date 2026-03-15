@@ -41,10 +41,15 @@ if [ ! -d '/usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard' ]; 
 	echo "Some thing wrong .. Plugin not installed"
 	exit 1
 else
-	SubsSupport="/usr/lib/enigma2/python/Plugins/Extensions/SubsSupport"
-	if [ -f "$SubsSupport/subtitles.py" ]; then
+	if python --version 2>&1 | grep -q '^Python 3\.'; then
+		echo ""
+	else
+		echo "You have Python2 image"
 		echo "Send subtitles.py file"
-		wget -q -O "$SubsSupport/subtitles.py" "https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/subtitles.py"
+		SubsSupport="/usr/lib/enigma2/python/Plugins/Extensions/SubsSupport"
+		if [ -f "$SubsSupport/subtitles.py" ]; then
+			wget -q -O "$SubsSupport/subtitles.py" "https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/subtitles.py"
+		fi
 	fi
 fi
 
