@@ -1,0 +1,3 @@
+# shell scripts run on the box via "wget ... | sh" - keep them LF in the
+# repository and in every checkout (also on Windows with core.autocrlf)
+*.sh text eol=lf

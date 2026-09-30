@@ -3,231 +3,287 @@
 
 # Code mfaraj57 and RAED (Fairbird)
 
+# The settings (config.NewVirtualKeyBoard), the settings screen, switching
+# between the image keyboard and this one, and the online update check.
+
 import os
+
+from enigma import gFont
 from Screens.Screen import Screen
 from Screens.MessageBox import MessageBox
 from Components.ActionMap import ActionMap
-from Components.config import *
+from Components.config import (config, configfile, getConfigListEntry, ConfigSubsection, ConfigText, ConfigYesNo, ConfigSelection,
+    ConfigInteger, ConfigSelectionNumber, ConfigNothing)
 from Components.ConfigList import ConfigListScreen
-from Components.MenuList import MenuList
 from Components.Label import Label
-from Components.Input import Input
-from Components.Pixmap import Pixmap
-from Tools.Directories import resolveFilename, SCOPE_PLUGINS
 
+from Plugins.SystemPlugins.NewVirtualKeyBoard import _
 from Plugins.SystemPlugins.NewVirtualKeyBoard.Console import Console
-from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
-from Plugins.SystemPlugins.NewVirtualKeyBoard.language_config import initialize_config, import_language
+from Plugins.SystemPlugins.NewVirtualKeyBoard.suggestions import SUGGESTION_PROVIDERS, SearchHistory
+from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import (PY3, INSTALLER_URL, DreamOS, byTier, getversioninfo, isFHD, logdata,
+    pluginPath, scaleSkin, sc, trace_error, urlread, versionTuple)
 
 VER = getversioninfo()
 
-############# language
-# Initialize configuration first
-initialize_config(config)
-
-# Import language module
-lang_module = import_language(config.NewVirtualKeyBoard.lang.value)
-globals().update(vars(lang_module))
-#############
 config.NewVirtualKeyBoard = ConfigSubsection()
 config.NewVirtualKeyBoard.keys_layout = ConfigText(default='', fixed_size=False)
-config.NewVirtualKeyBoard.lastsearchText = ConfigText(default='%s' % title1, fixed_size=False)
+config.NewVirtualKeyBoard.lastsearchText = ConfigText(default='', fixed_size=False)
 config.NewVirtualKeyBoard.firsttime = ConfigYesNo(default=True)
-config.NewVirtualKeyBoard.textinput = ConfigSelection(default='VirtualKeyBoard', choices=[('VirtualKeyBoard', _('%s' % title2)), ('NewVirtualKeyBoard', _('%s' % title3))])
-config.NewVirtualKeyBoard.showinplugins = ConfigYesNo(default = True)
+config.NewVirtualKeyBoard.textinput = ConfigSelection(default='VirtualKeyBoard', choices=[('VirtualKeyBoard', _("Image virtual keyboard")), ('NewVirtualKeyBoard', _("New Virtual Keyboard"))])
+config.NewVirtualKeyBoard.showinplugins = ConfigYesNo(default=True)
 config.NewVirtualKeyBoard.showsuggestion = ConfigYesNo(default=True)
-config.NewVirtualKeyBoard.fontssize = ConfigInteger(default = 0, limits = (0, 30))
+config.NewVirtualKeyBoard.suggestionsprovider = ConfigSelection(default='google', choices=SUGGESTION_PROVIDERS)
+config.NewVirtualKeyBoard.showhistory = ConfigYesNo(default=True)
+config.NewVirtualKeyBoard.rememberlast = ConfigYesNo(default=True)
+config.NewVirtualKeyBoard.historysize = ConfigInteger(default=100, limits=(1, 99999))
+# a selection instead of ConfigInteger: number keys can't type "-"
+config.NewVirtualKeyBoard.fontssize = ConfigSelectionNumber(min=-10, max=30, stepwidth=1, default=0, wraparound=False)
+config.NewVirtualKeyBoard.textalign = ConfigSelection(default='right', choices=[('left', _("Left")), ('right', _("Right"))])
+config.NewVirtualKeyBoard.showflags = ConfigYesNo(default=True)
+config.NewVirtualKeyBoard.bgcolor = ConfigSelection(default='default', choices=[('default', _("Default")), ('transparent', _("Transparent")), ('black', _("Black")), ('semi', _("Semi-transparent")), ('light', _("Mostly transparent"))])
+config.NewVirtualKeyBoard.numpad = ConfigYesNo(default=True)
 config.NewVirtualKeyBoard.updateonline = ConfigYesNo(default=True)
-try:
-        FONTSSIZE = config.NewVirtualKeyBoard.fontssize.value
-except:
-        FONTSSIZE = 0
+
+# ---- image keyboard <-> this keyboard ------------------------------------------
+# Screens/VirtualKeyBoard.py becomes a symlink to this plugin's file; the
+# image's own file (.py, or only .pyo/.pyc) is kept as VirtualKeyBoard_backup.*
+
+SCREENS_DIR = '/usr/lib/enigma2/python/Screens/'
+KEYBOARD_LINK = SCREENS_DIR + 'VirtualKeyBoard.py'
+
+
+def newKeyboardActive():
+    return os.path.islink(KEYBOARD_LINK)
+
+
+def switchKeyboard(useNew):
+    # True when done; raises OSError, returns False when the image keyboard
+    # can't be restored (no backup - the new keyboard stays then)
+    if useNew:
+        if newKeyboardActive():
+            return True
+        for ext in ('.py', '.pyo', '.pyc'):
+            image = SCREENS_DIR + 'VirtualKeyBoard' + ext
+            if os.path.exists(image):
+                os.rename(image, SCREENS_DIR + 'VirtualKeyBoard_backup' + ext)
+                break
+        # compiled copies of the image's .py would be loaded instead of the link
+        for ext in ('.pyo', '.pyc'):
+            if os.path.exists(SCREENS_DIR + 'VirtualKeyBoard' + ext):
+                os.remove(SCREENS_DIR + 'VirtualKeyBoard' + ext)
+        os.symlink(pluginPath('VirtualKeyBoard.py'), KEYBOARD_LINK)
+        return True
+    if not newKeyboardActive():
+        return True
+    for ext in ('.py', '.pyo', '.pyc'):
+        backup = SCREENS_DIR + 'VirtualKeyBoard_backup' + ext
+        if os.path.exists(backup):
+            os.remove(KEYBOARD_LINK)
+            os.rename(backup, SCREENS_DIR + 'VirtualKeyBoard' + ext)
+            return True
+    return False
+
+
+# ---- online update check -----------------------------------------------------------
+
+def parseInstaller(data):
+    # (version, description) from installer.sh: version="x.y" and a
+    # description="..." that may span several lines
+    if PY3 and isinstance(data, bytes):
+        data = data.decode('utf-8', 'replace')
+    version, description, descLines = None, '', None
+    for line in data.splitlines():
+        if descLines is not None:
+            # inside the description - a "version=" line there is text
+            if line.rstrip().endswith('"'):
+                descLines.append(line.rstrip()[:-1])
+                description = '\n'.join(descLines).strip()
+                descLines = None
+            else:
+                descLines.append(line)
+            continue
+        line = line.strip()
+        if line.startswith('version='):
+            version = line[len('version='):].strip('"\' ')
+        elif line.startswith('description='):
+            rest = line[len('description='):]
+            if rest.startswith('"'):
+                rest = rest[1:]
+            if rest.endswith('"'):
+                description = rest[:-1].strip()
+            else:
+                descLines = [rest] if rest else []
+    return version, description
+
+
+# ---- settings screen ------------------------------------------------------------------
+
+# FHD and HD geometry; WQHD scales the FHD one
+SETUP_GEOMETRY = {
+    'fhd': {'size': (1080, 815), 'title': (1076, 50, 35), 'config': (30, 55, 1020, 675), 'list': (45, 30),  # row height, font
+            'buttonX': (30, 290, 550, 810), 'buttonY': 770, 'icon': 38, 'label': (48, 222, 28)},
+    'hd': {'size': (720, 555), 'title': (720, 50, 20), 'config': (20, 60, 680, 450), 'list': (30, 20),
+           'buttonX': (20, 195, 370, 545), 'buttonY': 520, 'icon': 25, 'label': (32, 140, 18)},
+}
+
+
+def setupSkin():
+    g = SETUP_GEOMETRY['fhd' if isFHD() else 'hd']
+    width, height = g['size']
+    titleW, titleH, titleFont = g['title']
+    out = ['<screen name="nvKeyboardSetup" position="center,center" size="%d,%d" backgroundColor="#16000000" title="New Virtual Keyboard Settings" flags="wfNoBorder">' % (width, height)]
+    out.append('<widget source="Title" render="Label" position="0,0" size="%d,%d" font="Regular;%d" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000" />' % (titleW, titleH, titleFont))
+    # no itemHeight/font on the list: older images (VTi) reject them in the
+    # skin - set from code (nvKeyboardSetup.setListFonts)
+    out.append('<widget name="config" position="%d,%d" size="%d,%d" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />' % g['config'])
+    icon = g['icon']
+    labelOffset, labelW, labelFont = g['label']
+    # each tier has its own button pictures (images/key_red_sd.png, ...)
+    suffix = byTier('', '_wqhd', '_sd')
+    for x, colour in zip(g['buttonX'], ('red', 'green', 'yellow', 'blue')):
+        out.append('<ePixmap position="%d,%d" size="%d,%d" pixmap="%s" zPosition="3" transparent="1" alphatest="blend" />' % (x, g['buttonY'], icon, icon, pluginPath('images', 'key_%s%s.png' % (colour, suffix))))
+        out.append('<widget name="key_%s" position="%d,%d" size="%d,%d" zPosition="4" halign="left" valign="center" font="Regular;%d" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" />' % (colour, x + labelOffset, g['buttonY'], labelW, icon, labelFont))
+    out.append('</screen>')
+    return scaleSkin('\n'.join(out))
+
+
+def settingRows():
+    # (text, config element) of every setting in the screen
+    s = config.NewVirtualKeyBoard
+    return [
+        (_("Text input method-keyboard") + ':', s.textinput),
+        (_("Font size (-10 to +30)") + ':', s.fontssize),
+        (_("Show suggestions") + ':', s.showsuggestion),
+        (_("Suggestions provider") + ':', s.suggestionsprovider),
+        (_("Show search history") + ':', s.showhistory),
+        (_("Search history entries (1-99999)") + ':', s.historysize),
+        (_("Remember last search entry") + ':', s.rememberlast),
+        (_("Text field alignment") + ':', s.textalign),
+        (_("Show flags") + ':', s.showflags),
+        (_("Background color") + ':', s.bgcolor),
+        (_("Numeric keypad for numbers") + ':', s.numpad),
+        (_("Enable/Disable Checking Online Update") + ':', s.updateonline),
+        (_("Show plugin in Plugin Browser") + ':', s.showinplugins),
+    ]
 
 
 class nvKeyboardSetup(ConfigListScreen, Screen):
 
-    def __init__(self, session, fromkeyboard=False):
-        if not DreamOS():
-        	if isFHD():
-        		self.skin = """
-				<screen name="nvKeyboardSetup" position="center,center" size="1080,400" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s" flags="wfNoBorder">
-    				<widget source="Title" render="Label" position="0,0" size="1076,50" itemHeight="40" font="Regular;35" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
-	
-				<widget name="config" position="30,55" size="1020,298" itemHeight="45" font="Regular;30" secondfont="Regular;28" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
-
-				<ePixmap position="30,360" size="38,38" pixmap="~/images/key_red.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="78,360" zPosition="4" size="300,38" halign="left" valign="center" font="Regular;30" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_red" />
-
-				<ePixmap position="330,360" size="38,38" pixmap="~/images/key_green.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="378,360" zPosition="4" size="300,38" halign="left" valign="center" font="Regular;30" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_green" />
-
-				<ePixmap position="630,360" size="38,38" pixmap="~/images/key_yellow.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="678,360" zPosition="4" size="420,38" halign="left" valign="center" font="Regular;30" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_yellow" />
-				</screen>""" % VER
-        	else:
-        		self.skin = """
-				<screen name="nvKeyboardSetup" position="center,center" size="720,280" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s" flags="wfNoBorder">
-    				<widget source="Title" render="Label" position="0,0" size="720,50" itemHeight="30" font="Regular;20" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
-	
-				<widget name="config" position="20,60" size="680,182" itemHeight="30" font="Regular;20" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
-
-				<ePixmap position="20,250" size="25,25" pixmap="~/images/key_red_sd.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="52,250" zPosition="4" size="200,25" halign="left" valign="center" font="Regular;20" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_red" />
-
-				<ePixmap position="220,250" size="25,25" pixmap="~/images/key_green_sd.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="252,250" zPosition="4" size="200,25" halign="left" valign="center" font="Regular;20" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_green" />
-
-				<ePixmap position="420,250" size="25,25" pixmap="~/images/key_yellow_sd.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="452,250" zPosition="4" size="280,25" halign="left" valign="center" font="Regular;20" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_yellow" />
-				</screen>""" % VER
-        else:
-        	if isFHD():
-        		self.skin = """
-				<screen name="nvKeyboardSetup" position="center,center" size="1080,400" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s" flags="wfNoBorder">
-    				<widget source="Title" render="Label" position="0,0" size="1076,50" font="Regular;35" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
-	
-				<widget name="config" position="30,55" size="1020,298" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
-
-				<ePixmap position="30,360" size="38,38" pixmap="~/images/key_red.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="78,360" zPosition="4" size="300,38" halign="left" valign="center" font="Regular;30" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_red" />
-
-				<ePixmap position="330,360" size="38,38" pixmap="~/images/key_green.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="378,360" zPosition="4" size="300,38" halign="left" valign="center" font="Regular;30" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_green" />
-
-				<ePixmap position="630,360" size="38,38" pixmap="~/images/key_yellow.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="678,360" zPosition="4" size="420,38" halign="left" valign="center" font="Regular;30" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_yellow" />
-				</screen>""" % VER
-        	else:
-        		self.skin = """
-				<screen name="nvKeyboardSetup" position="center,center" size="720,280" backgroundColor="#16000000" title="New Virtual Keyboard Settings  V %s" flags="wfNoBorder">
-    				<widget source="Title" render="Label" position="0,0" size="720,50" font="Regular;20" halign="center" valign="center" foregroundColor="#00ffffff" backgroundColor="#16000000"/>
-	
-				<widget name="config" position="20,60" size="680,182" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />
-
-				<ePixmap position="20,250" size="25,25" pixmap="~/images/key_red_sd.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="52,250" zPosition="4" size="200,25" halign="left" valign="center" font="Regular;20" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_red" />
-
-				<ePixmap position="220,250" size="25,25" pixmap="~/images/key_green_sd.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="252,250" zPosition="4" size="200,25" halign="left" valign="center" font="Regular;20" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_green" />
-
-				<ePixmap position="420,250" size="25,25" pixmap="~/images/key_yellow_sd.png" zPosition="3" transparent="1" alphatest="blend" />
-				<widget position="452,250" zPosition="4" size="280,25" halign="left" valign="center" font="Regular;20" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" name="key_yellow" />
-				</screen>""" % VER
+    def __init__(self, session, fromkeyboard=False, keyboard=None):
+        # keyboard: the open keyboard when started with MENU from it
+        self.skin = setupSkin()
         Screen.__init__(self, session)
+        self.keyboard = keyboard
+        self.closed = False
+        # the setting follows the symlink (changed by hand or by the installer)
+        config.NewVirtualKeyBoard.textinput.value = 'NewVirtualKeyBoard' if newKeyboardActive() else 'VirtualKeyBoard'
+        config.NewVirtualKeyBoard.textinput.save()
+        self.startTextinput = config.NewVirtualKeyBoard.textinput.value
+        self.startShowinplugins = config.NewVirtualKeyBoard.showinplugins.value
+        # value-less rows that run something on OK
+        self.actionInstallLanguage = ConfigNothing()
+        self.actionClearHistory = ConfigNothing()
         self.list = []
-        py_link = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard.py")
-        if not os.path.islink(py_link):
-            config.NewVirtualKeyBoard.textinput.value = "VirtualKeyBoard"
-            config.NewVirtualKeyBoard.textinput.save()
-        else:
-            config.NewVirtualKeyBoard.textinput.value = "NewVirtualKeyBoard"
-            config.NewVirtualKeyBoard.textinput.save()
-        self.skin_path = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard")
-        self.fromkeyboard = fromkeyboard
-        self['config'] = MenuList([])
         ConfigListScreen.__init__(self, self.list, session=session, on_change=self.changedEntry)
-        self["setupActions"] = ActionMap(["SetupActions", "ColorActions", "EPGSelectActions"],
-        {
-        	"cancel": self.keyClose,
-        	"green": self.keySave,
-        	"yellow": self.showNewkeyboard,
-        	#"left": self.keyLeft,
-        	#"right": self.keyRight
+        # "ok" goes to keyActionRow first; for the other rows it returns 0 and
+        # the image's own ConfigListScreen.keyOK runs (it must not be
+        # overridden here, that made OK dead on older images)
+        self['setupActions'] = ActionMap(['SetupActions', 'ColorActions'], {
+            'cancel': self.keyClose,
+            'green': self.keySave,
+            'ok': self.keyActionRow,
+            'yellow': self.showNewkeyboard,
+            'blue': self.showNumpad,
         }, -2)
-        self["key_red"] = Label(_("%s") % title4)
-        self["key_green"] = Label(_("%s") % title5)
-        self["key_yellow"] = Label(_("%s") % title6)
-        self.showinplugins = config.NewVirtualKeyBoard.showinplugins.value
-        self.fontssize = config.NewVirtualKeyBoard.fontssize.value
-        self.currKeyoboard = config.NewVirtualKeyBoard.textinput.value
-        self.showKeyoboard = config.NewVirtualKeyBoard.showsuggestion.value
-        self.langvalue = config.NewVirtualKeyBoard.lang.value
+        self['key_red'] = Label(_("Cancel"))
+        self['key_green'] = Label(_("Save"))
+        self['key_yellow'] = Label(_("Virtual Keyboard"))
+        self['key_blue'] = Label(_("Numeric keypad"))
+        self.onClose.append(self.setClosed)
+        self.onLayoutFinish.append(self.onStart)
         self.createConfigList()
 
-    def changedEntry(self):
-        cur = self['config'].list[0]
-        curval = cur[1].value
-        print("curval", curval)
-        if 'NewVirtualKeyBoard' == curval:
-            self.createConfigList(True)
-        else:
-            self.createConfigList(False)
-
-    def createConfigList(self, value=False):
+    def onStart(self):
+        # the skin's title attribute can't be translated
+        self.setTitle('%s  V %s' % (_("New Virtual Keyboard Settings"), VER))
+        self.setListFonts()
         if config.NewVirtualKeyBoard.updateonline.value:
-                self.checkupdates()
+            self.checkupdates()
 
-        self.list = []
-        self.list.append(getConfigListEntry(_('%s:' % title7), config.NewVirtualKeyBoard.textinput))
-        self.list.append(getConfigListEntry(_('%s:' % title8), config.NewVirtualKeyBoard.lang))
-        self.list.append(getConfigListEntry(_('%s:' % title9), config.NewVirtualKeyBoard.fontssize))
-        if config.NewVirtualKeyBoard.textinput.value == 'NewVirtualKeyBoard' or value is True:
-            self.list.append(getConfigListEntry(_('%s:' % title10), config.NewVirtualKeyBoard.showsuggestion))
-        else:
-            pass
-        self.list.append(getConfigListEntry(_('%s:' % title11), config.NewVirtualKeyBoard.updateonline))
-        self.list.append(getConfigListEntry(_('%s:' % title12), config.NewVirtualKeyBoard.showinplugins))
+    def setListFonts(self):
+        # row height and font of the list (DreamOS keeps its own)
+        if DreamOS():
+            return
+        itemHeight, font = [sc(v) for v in SETUP_GEOMETRY['fhd' if isFHD() else 'hd']['list']]
+        instance = getattr(self['config'], 'instance', None)
+        if instance is None:
+            return
+        for method, value in (('setItemHeight', itemHeight), ('setFont', gFont('Regular', font))):
+            try:
+                getattr(instance, method)(value)
+            except Exception:
+                trace_error()
+
+    def setClosed(self):
+        self.closed = True
+
+    def changedEntry(self):
+        # rebuilds for the rows that depend on others (suggestions provider)
+        self.createConfigList()
+
+    def createConfigList(self):
+        # action rows (OK) on top, then all settings
+        self.list = [getConfigListEntry(_("Install language") + ' ...', self.actionInstallLanguage),
+                     getConfigListEntry(_("Clear search history") + ' ...', self.actionClearHistory)]
+        for text, element in settingRows():
+            if element is config.NewVirtualKeyBoard.suggestionsprovider and not config.NewVirtualKeyBoard.showsuggestion.value:
+                continue
+            self.list.append(getConfigListEntry(text, element))
         self['config'].list = self.list
         self['config'].l.setList(self.list)
 
+    def keyActionRow(self):
+        current = self['config'].getCurrent()
+        if current and current[1] is self.actionInstallLanguage:
+            self.installLanguage()
+        elif current and current[1] is self.actionClearHistory:
+            self.clearHistory()
+        else:
+            return 0
+
     def keySave(self):
-        for x in self['config'].list:
-            x[1].save()
+        # all settings, also the ones hidden right now
+        for text, element in settingRows():
+            element.save()
         configfile.save()
-        py_link = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard.py")
-        pyc_link = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard.pyc")
-        py_image = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard.py")
-        py_backup = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard_backup.py")
-        pyo_image = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard.pyo")
-        pyc_image = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard.pyc")
-        pyo_backup = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard_backup.pyo")
-        pyc_backup = ("/usr/lib/enigma2/python/Screens/VirtualKeyBoard_backup.pyc")
-        py_NewVirtualKeyBoard = resolveFilename(SCOPE_PLUGINS, "SystemPlugins/NewVirtualKeyBoard/VirtualKeyBoard.py")
-
-        if self.currKeyoboard != config.NewVirtualKeyBoard.textinput.value or self.showKeyoboard != config.NewVirtualKeyBoard.showsuggestion.value or \
-        	self.fontssize != config.NewVirtualKeyBoard.fontssize.value or self.showinplugins != config.NewVirtualKeyBoard.showinplugins.value or \
-        	self.langvalue != config.NewVirtualKeyBoard.lang.value:
-            if config.NewVirtualKeyBoard.textinput.value == "NewVirtualKeyBoard":
-                #if os.path.exists(pyc_link):
-                #    os.remove(pyc_link)
-                if not os.path.islink(py_link):
-                    if os.path.exists(py_image):
-                        os.rename(py_image, py_backup)
-                        if os.path.exists(pyo_image):
-                            os.remove(pyo_image)
-                        elif os.path.exists(pyc_image):
-                            os.remove(pyc_image)
-                    elif os.path.exists(pyo_image):
-                        os.rename(pyo_image, pyo_backup)
-                    elif os.path.exists(pyc_image):
-                        os.rename(pyc_image, pyc_backup)
-                    os.symlink(py_NewVirtualKeyBoard, py_link)
-            elif config.NewVirtualKeyBoard.textinput.value == "VirtualKeyBoard":
-                if os.path.islink(py_link):
-                    if os.path.exists(py_backup):
-                        os.remove(py_link)
-                        os.rename(py_backup, py_image)
-                    elif os.path.exists(pyo_backup):
-                        os.remove(py_link)
-                        os.rename(pyo_backup, pyo_image)
-                    elif os.path.exists(pyc_backup):
-                        os.remove(py_link)
-                        os.rename(pyc_backup, pyc_image)
-                else:
-                    pass
-            self.session.openWithCallback(self.restartenigma, MessageBox, _('%s:' % title13), MessageBox.TYPE_YESNO)
-        else:
-            self.close(True)
-
-    def showNewkeyboard(self):
-        if self.fromkeyboard:
-            self.close()
-        else:
+        textinput = config.NewVirtualKeyBoard.textinput
+        if textinput.value != self.startTextinput:
             try:
-                from Plugins.SystemPlugins.NewVirtualKeyBoard.VirtualKeyBoard import VirtualKeyBoard
-                self.session.open(VirtualKeyBoard)
-            except Exception as e:
-                print(e)
+                done = switchKeyboard(textinput.value == 'NewVirtualKeyBoard')
+            except OSError as e:
+                trace_error()
+                done = False
+                self.session.open(MessageBox, '%s\n\n%s' % (_("Switching the keyboard failed"), e), MessageBox.TYPE_ERROR)
+            else:
+                if not done:
+                    self.session.open(MessageBox, _("The backup of the image keyboard is missing, the New Virtual Keyboard stays active."), MessageBox.TYPE_ERROR)
+            if not done:
+                textinput.value = 'NewVirtualKeyBoard' if newKeyboardActive() else 'VirtualKeyBoard'
+                textinput.save()
+                configfile.save()
+                if textinput.value == self.startTextinput:
+                    return
+        elif config.NewVirtualKeyBoard.showinplugins.value == self.startShowinplugins:
+            # font size, suggestions etc. apply on the next open of the
+            # keyboard; the keyboard switch and the plugin list need a restart
+            self.close(True)
+            return
+        self.session.openWithCallback(self.restartenigma, MessageBox, _("Restart enigma2 to load new settings?"), MessageBox.TYPE_YESNO)
+
+    def keyClose(self):
+        for text, element in settingRows():
+            element.cancel()
+        self.close()
 
     def restartenigma(self, result):
         if result:
@@ -236,67 +292,63 @@ class nvKeyboardSetup(ConfigListScreen, Screen):
         else:
             self.close(True)
 
-    def keyClose(self):
-        for x in self['config'].list:
-            x[1].cancel()
-        self.close()
+    def showNewkeyboard(self):
+        # try the keyboard (also when opened from it: a second one on top,
+        # the settings being edited are kept)
+        try:
+            from Plugins.SystemPlugins.NewVirtualKeyBoard.VirtualKeyBoard import NewVirtualKeyBoard
+            self.session.open(NewVirtualKeyBoard, title=_("Virtual Keyboard"), text='')
+        except Exception:
+            trace_error()
+
+    def showNumpad(self):
+        # try the numeric keypad (shown for number fields)
+        from Plugins.SystemPlugins.NewVirtualKeyBoard.numpad import NVKNumPad
+        self.session.open(NVKNumPad, title=_("Numeric keypad"), text='', mode='number')
+
+    def installLanguage(self):
+        if self.keyboard is not None:
+            self.keyboard.switchToLanguageSelection()
+            return
+        from Plugins.SystemPlugins.NewVirtualKeyBoard.VirtualKeyBoard import LanguageListScreen
+        self.session.open(LanguageListScreen)
+
+    def clearHistory(self):
+        self.session.openWithCallback(self.clearHistoryConfirmed, MessageBox, _("Delete the search history?"), MessageBox.TYPE_YESNO)
+
+    def clearHistoryConfirmed(self, answer=False):
+        if not answer:
+            return
+        if self.keyboard is not None:
+            self.keyboard.clearSearchHistory()
+        else:
+            SearchHistory().clear()
+
+    # ---- online update ----------------------------------------------------------------
 
     def checkupdates(self):
         try:
-                from twisted.web.client import getPage, error
-                url = b"https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh"
-                getPage(url,timeout=10).addCallback(self.parseData).addErrback(self.errBack)
-        except Exception as error:
-                trace_error()
+            from twisted.internet import threads
+            threads.deferToThread(urlread, INSTALLER_URL, 10).addCallback(lambda result: self.parseData(result[0])).addErrback(self.errBack)
+        except Exception:
+            trace_error()
 
-    def errBack(self,error=None):
-        logdata("errBack-error",error)
+    def errBack(self, error=None):
+        logdata('errBack-error', error)
 
     def parseData(self, data):
-        if PY3:
-        	data = data.decode("utf-8")
-        else:
-        	data = data.encode("utf-8")
+        if self.closed:
+            return
+        version, description = parseInstaller(data)
+        new, current = versionTuple(version), versionTuple(VER)
+        if new is None or current is None:
+            logdata('Updates', 'version check failed')
+            return
+        if new <= current:
+            logdata('Updates', 'No new version available')
+            return
+        self.session.openWithCallback(self.install, MessageBox, '%s %s %s.\n\n%s\n\n%s' % (_("New version"), version, _("is available"), description, _("Do you want to install it now?")), MessageBox.TYPE_YESNO)
 
-        if data:
-        	lines = data.split("\n")
-        	desc_started = False
-        	desc_lines = []
-        	for line in lines:
-        		line = line.strip()
-        		if line.startswith("version"):
-        			self.new_version = line.split("=")[1].strip('"').strip().strip('"').strip("'")
-        		elif line.startswith("description="):
-        			desc_started = True
-        			first_part = line.split("=", 1)[1].lstrip('"')
-        			if first_part.endswith('"'):
-        				# description is in one line only
-        				self.new_description = first_part.rstrip('"').strip().strip('"').strip("'")
-        				desc_started = False
-        			else:
-        				desc_lines.append(first_part)
-        		elif desc_started:
-        			if line.endswith('"'):
-        				desc_lines.append(line.rstrip('"'))
-        				desc_started = False
-        				self.new_description = "\n".join(desc_lines)
-        			else:
-        				desc_lines.append(line)
-        if float(VER) >= float(self.new_version):
-        	logdata("Updates", "No new version available")
-        else:
-        	new_description = self.new_description
-        	self.session.openWithCallback(self.install, MessageBox, _('%s %s %s.\n\n%s\n\n%s.' % (title14, self.new_version, title15, new_description, title16)), MessageBox.TYPE_YESNO)
-
-    def install(self,answer=False):
-        try:
-                if answer:
-                        cmdlist = []
-                        cmd="wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh"
-                        cmdlist.append(cmd)
-                        self.session.open(Console, title='%s' % title17, cmdlist=cmdlist, finishedCallback=self.myCallback, closeOnSuccess=False)
-        except:
-                trace_error()
-        
-    def myCallback(self, result = None):
-        return
+    def install(self, answer=False):
+        if answer:
+            self.session.open(Console, title=_("Installing last update, enigma will be started after install"), cmdlist=['wget %s -O - | /bin/sh' % INSTALLER_URL], closeOnSuccess=False)

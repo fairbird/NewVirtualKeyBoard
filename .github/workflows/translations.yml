@@ -1,0 +1,70 @@
+name: Update translation templates
+
+# Same as E2iPlayer's translations workflow: regenerates
+# locale/NewVirtualKeyBoard.pot from the _() texts in the code and runs
+# msgmerge over every language (locale/updateallpo.sh), then - only if
+# something changed - opens (or updates) ONE pull request with the result.
+# Nothing is pushed directly and nothing is translated: new texts land as
+# untranslated msgid entries and show in English until a translator fills
+# them in.
+#
+# Extra step for NewVirtualKeyBoard: every .mo is rebuilt from its .po, so a
+# translation edited in a .po alone also gets its compiled .mo (the
+# installer copies usr/ as is, the box can't compile them).
+#
+# Manual trigger only (Actions tab -> "Update translation templates" -> Run
+# workflow, on the branch to update; the PR goes against that branch).
+# Needs "Allow GitHub Actions to create and approve pull requests" in the
+# repository's Settings -> Actions -> General.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: translation-templates
+  cancel-in-progress: true
+
+jobs:
+  update-pot:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install gettext
+        run: |
+          sudo apt-get -q update
+          sudo apt-get install -y gettext
+
+      - name: Regenerate .pot / .po / .mo
+        run: |
+          cd usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/locale
+          chmod +x updateallpo.sh
+          ./updateallpo.sh
+          for po in */LC_MESSAGES/NewVirtualKeyBoard.po; do
+            msgfmt -o "${po%.po}.mo" "$po"
+          done
+
+      - name: Open or update the translation-templates PR
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+        with:
+          add-paths: usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/locale/**
+          branch: chore/translation-templates
+          base: ${{ github.ref_name }}
+          delete-branch: true
+          commit-message: "translation templates: regenerate .pot / .po / .mo"
+          title: "translation templates: regenerate .pot / .po / .mo"
+          body: |
+            Automated `xgettext` + `msgmerge` + `msgfmt` run via
+            `locale/updateallpo.sh` (started by hand from the Actions tab).
+
+            * mechanical extraction only - **no texts were translated**
+            * new texts appear as `msgstr ""` and show in English until
+              someone translates them
+            * every `.mo` is rebuilt from its `.po`
+
+            Merge to pick up new / changed `_()` texts and edited
+            translations.

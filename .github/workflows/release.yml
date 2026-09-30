@@ -1,0 +1,134 @@
+name: release
+
+# A new version (usr/.../NewVirtualKeyBoard/version changed on main) or a manual
+# start builds the packages and publishes a GitHub release v<version>:
+#   - enigma2-plugin-systemplugins-newvirtualkeyboard_<version>_all.ipk  (opkg)
+#   - enigma2-plugin-systemplugins-newvirtualkeyboard_<version>_all.deb  (DreamOS)
+#   - NewVirtualKeyBoard-<version>.zip  (usr/ tree to copy by hand)
+#   - SHA256SUMS
+# Release text: the "What is NEW" lines of installer.sh plus the commits since
+# the previous tag. An existing release is left alone; a manual start with
+# "replace" rebuilds and replaces its files.
+# The logic test runs first - no release when it fails.
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/version'
+  workflow_dispatch:
+    inputs:
+      replace:
+        description: 'Replace the files of an existing release of this version'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # releases come from main only (also when started by hand on a branch)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Read version
+        id: ver
+        run: |
+          VERSION=$(sed -n 's/^version=//p' usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/version | tr -d '\r')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if gh release view "v$VERSION" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Version $VERSION"
+
+      - name: Nothing to do
+        if: steps.ver.outputs.exists == 'true' && inputs.replace != true
+        run: echo "Release v${{ steps.ver.outputs.version }} exists already - start by hand with 'replace' to rebuild its files."
+
+      - name: Logic test
+        if: steps.ver.outputs.exists != 'true' || inputs.replace == true
+        run: |
+          python -m pip install --quiet Pillow
+          for width in 1280 1920 2560; do
+            python tests/test_keyboard.py $width
+          done
+
+      - name: Build ipk / deb / zip
+        if: steps.ver.outputs.exists != 'true' || inputs.replace == true
+        run: |
+          # reproducible: file times = commit time
+          export SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)
+          python CI/build_packages.py --out dist
+
+      - name: Check the packages with dpkg
+        if: steps.ver.outputs.exists != 'true' || inputs.replace == true
+        run: |
+          set -e
+          for p in dist/*.deb dist/*.ipk; do
+            echo "== $p"
+            dpkg-deb --info "$p"
+            dpkg-deb --contents "$p" | grep -q 'NewVirtualKeyBoard/VirtualKeyBoard.py'
+            dpkg-deb --contents "$p" | grep -q 'LC_MESSAGES/NewVirtualKeyBoard.mo'
+            # ("! cmd" does not stop a "set -e" script)
+            if dpkg-deb --contents "$p" | grep -q '\.po$'; then
+              echo "::error::$p contains .po files"
+              exit 1
+            fi
+          done
+          (cd dist && sha256sum -c SHA256SUMS)
+
+      - name: Release text
+        if: steps.ver.outputs.exists != 'true' || inputs.replace == true
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 --exclude "v$VERSION" 2>/dev/null || true)
+          {
+            echo "## NewVirtualKeyBoard $VERSION"
+            echo
+            sed -n '/^description="/,/^"$/p' installer.sh | sed '1d;$d' | sed '/^What is NEW/d;/^$/d'
+            echo
+            echo "### Install"
+            echo '- OE images (openATV, OpenPLi, OpenViX, ...): copy the `.ipk` to `/tmp` and run `opkg install /tmp/<file>.ipk`'
+            echo '- DreamOS: copy the `.deb` to `/tmp` and run `dpkg -i /tmp/<file>.deb`'
+            echo '- or online: `wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh`'
+            echo
+            echo "Restart enigma2, then choose the keyboard in Menu > System > NewVirtualKeyBoard setup."
+            echo
+            if [ -n "$LAST_TAG" ]; then
+              echo "### Commits since $LAST_TAG"
+              git log "$LAST_TAG"..HEAD --pretty=format:"- %s (%h)" --no-merges
+            else
+              echo "### Latest commits"
+              git log --pretty=format:"- %s (%h)" --no-merges -n 15
+            fi
+          } > release-notes.md
+          cat release-notes.md
+
+      - name: Publish
+        if: steps.ver.outputs.exists != 'true' || inputs.replace == true
+        env:
+          VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          if [ "${{ steps.ver.outputs.exists }}" = "true" ]; then
+            gh release upload "v$VERSION" dist/* --clobber
+            gh release edit "v$VERSION" --notes-file release-notes.md
+          else
+            gh release create "v$VERSION" dist/* --target "$GITHUB_SHA" \
+              --title "NewVirtualKeyBoard $VERSION" --notes-file release-notes.md
+          fi

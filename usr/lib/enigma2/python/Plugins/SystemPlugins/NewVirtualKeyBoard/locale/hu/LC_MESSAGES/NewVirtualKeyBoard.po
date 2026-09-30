@@ -1,0 +1,274 @@
+# NewVirtualKeyBoard - hu
+# Hungarian translation by Warder Thank you
+# Converted from language/hu.py (titleN) to gettext.
+msgid ""
+msgstr ""
+"Project-Id-Version: NewVirtualKeyBoard\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-30 11:20+0200\n"
+"PO-Revision-Date: 2026-09-30 00:37+0200\n"
+"Last-Translator: Warder\n"
+"Language-Team: \n"
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid ""
+"\n"
+"Press OK or Exit to abort!"
+msgstr ""
+
+msgid "0-9 - Text input like on a phone, when the input field is selected"
+msgstr ""
+
+msgid "Alt"
+msgstr ""
+
+msgid "Background color"
+msgstr ""
+
+msgid "Black"
+msgstr ""
+
+msgid "Blue - Shift"
+msgstr ""
+
+msgid "Cancel"
+msgstr "Mégsem"
+
+msgid "Cancel execution?"
+msgstr ""
+
+msgid "Caps"
+msgstr ""
+
+msgid "Clear"
+msgstr ""
+
+msgid "Clear search history"
+msgstr ""
+
+msgid "Console"
+msgstr ""
+
+msgid "Ctrl"
+msgstr ""
+
+msgid "Default"
+msgstr ""
+
+msgid "Delete the search history?"
+msgstr ""
+
+msgid "Do you want to install it now?"
+msgstr "Nem szeretné most telepíteni"
+
+msgid "Enable/Disable Checking Online Update"
+msgstr "Online frissítések ellenőrzésének engedélyezése/letiltása"
+
+msgid "Enter"
+msgstr ""
+
+#. TRANSLATORS: key caps of the on-screen keyboard - keep them as
+#. short as the English ones, the keys are small
+msgid "Esc"
+msgstr ""
+
+msgid "Execution finished!!"
+msgstr ""
+
+msgid "Execution progress:"
+msgstr ""
+
+msgid "Exit"
+msgstr ""
+
+msgid "Exit - Close without taking the text"
+msgstr ""
+
+msgid "Failed to download language, try later"
+msgstr "Nem sikerült letölteni a nyelvet, próbálja később"
+
+msgid "Fast forward - Insert space"
+msgstr ""
+
+msgid "Font size (-10 to +30)"
+msgstr ""
+
+msgid "Green - Enter: confirm the text and close"
+msgstr ""
+
+msgid "Help"
+msgstr ""
+
+msgid "Hide"
+msgstr ""
+
+msgid "Image virtual keyboard"
+msgstr "Kép virtuális billentyűzet"
+
+msgid "Info - Show this screen again"
+msgstr "Infó - Képernyő újbóli megjelenítése"
+
+msgid "Install language"
+msgstr "Nyelv telepítése"
+
+msgid "Installing last update, enigma will be started after install"
+msgstr "Az utolsó frissítés telepítése, az Enigma a telepítés után indul el"
+
+msgid "Keyboard layout selection"
+msgstr ""
+
+msgid "Language downloaded successfully, exit from install"
+msgstr "Nyelv letöltése sikeres, kilépés a telepítésből"
+
+msgid "Language removed from installed package"
+msgstr "Nyelv eltávolítva a telepített csomagból"
+
+msgid "Left"
+msgstr ""
+
+msgid "Left / Right at the edge of the keyboard - Switch to the suggestions or the search history"
+msgstr ""
+
+#, python-format
+msgid "Loading the keyboard layout %s failed"
+msgstr ""
+
+msgid "Menu - Settings, install languages, clear the search history"
+msgstr ""
+
+msgid "Mostly transparent"
+msgstr ""
+
+msgid "New Virtual Keyboard"
+msgstr "Új virtuális billentyűzet"
+
+msgid "New Virtual Keyboard - Original code SamSamSam (e2iplayer). Contributors: mfaraj57 and Fairbird. Skin and amends: KiddaC"
+msgstr "Új virtuális billentyűzet - Eredeti kód: SamSamSam (e2iplayer). Közreműködők: mfaraj57 és Fairbird. Kinézet és módosítások: KiddaC"
+
+msgid "New Virtual Keyboard Settings"
+msgstr ""
+
+msgid "New version"
+msgstr "Új verzió"
+
+#, python-format
+msgid "NewVirtualKeyBoard  V %s"
+msgstr ""
+
+msgid "NewVirtualKeyBoard setup"
+msgstr ""
+
+msgid "Numeric keypad"
+msgstr ""
+
+msgid "Numeric keypad for numbers"
+msgstr ""
+
+msgid "OK - Type the selected key / take the selected suggestion or history entry"
+msgstr ""
+
+msgid "OK / GREEN - accept, EXIT - cancel"
+msgstr ""
+
+msgid "PVR - Switch between keyboard, suggestions and search history"
+msgstr ""
+
+msgid "Page Down - Clear input text"
+msgstr "Page Down - Bevitt szöveg törlése"
+
+msgid "Page Up - Insert space"
+msgstr "Page Up - Szóköz beszúrása"
+
+msgid "Press ok to install language"
+msgstr "Nyomja meg az OK gombot a nyelv telepítéséhez"
+
+msgid "Press ok to remove language"
+msgstr "Nyomja meg az OK gombot a nyelv eltávolításához"
+
+msgid "Previous / Next - Switch between keyboard, suggestions and search history"
+msgstr ""
+
+msgid "Red - Backspace"
+msgstr ""
+
+msgid "Remember last search entry"
+msgstr ""
+
+msgid "Restart GUI"
+msgstr ""
+
+msgid "Restart enigma2 to load new settings?"
+msgstr "Újraindítja az enigma2-t az új beállítások betöltéséhez?"
+
+msgid "Rewind - Clear input text"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Save"
+msgstr "Mentés"
+
+msgid "Search history"
+msgstr "Keresési előzmények"
+
+msgid "Search history entries (1-99999)"
+msgstr ""
+
+msgid "Semi-transparent"
+msgstr ""
+
+msgid "Setup virtual keyboard"
+msgstr ""
+
+msgid "Shift"
+msgstr ""
+
+msgid "Show flags"
+msgstr ""
+
+msgid "Show plugin in Plugin Browser"
+msgstr "Bővítmény megjelenítése a bővítményböngészőben"
+
+msgid "Show search history"
+msgstr ""
+
+msgid "Show suggestions"
+msgstr ""
+
+msgid "Suggestions"
+msgstr ""
+
+msgid "Suggestions provider"
+msgstr ""
+
+msgid "Switching the keyboard failed"
+msgstr ""
+
+msgid "Text - Switch language"
+msgstr ""
+
+msgid "Text field alignment"
+msgstr ""
+
+msgid "Text input method-keyboard"
+msgstr "Szövegbeviteli módszer - billentyűzet"
+
+msgid "The backup of the image keyboard is missing, the New Virtual Keyboard stays active."
+msgstr ""
+
+msgid "Transparent"
+msgstr ""
+
+msgid "Virtual Keyboard"
+msgstr ""
+
+msgid "Yellow - AltGr"
+msgstr ""
+
+msgid "is available"
+msgstr "elérhető"
