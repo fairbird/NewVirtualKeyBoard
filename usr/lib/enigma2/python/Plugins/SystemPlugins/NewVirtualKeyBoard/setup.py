@@ -120,10 +120,10 @@ def parseInstaller(data):
 
 # FHD and HD geometry; WQHD scales the FHD one
 SETUP_GEOMETRY = {
-    'fhd': {'size': (1080, 815), 'title': (1076, 50, 35), 'config': (30, 55, 1020, 675), 'list': (45, 30),  # row height, font
-            'buttonX': (30, 290, 550, 810), 'buttonY': 770, 'icon': 38, 'label': (48, 222, 28)},
+    'fhd': {'size': (1080, 830), 'title': (1076, 50, 35), 'config': (30, 55, 1020, 675), 'list': (45, 30),  # row height, font
+            'buttonX': (30, 290, 550, 810), 'buttonY': 770, 'icon': 38, 'label': (48, 222, 68, 28)},  # label: x offset, width, height, font
     'hd': {'size': (720, 555), 'title': (720, 50, 20), 'config': (20, 60, 680, 450), 'list': (30, 20),
-           'buttonX': (20, 195, 370, 545), 'buttonY': 520, 'icon': 25, 'label': (32, 140, 18)},
+           'buttonX': (20, 195, 370, 545), 'buttonY': 520, 'icon': 25, 'label': (32, 140, 44, 18)},
 }
 
 
@@ -137,12 +137,15 @@ def setupSkin():
     # skin - set from code (nvKeyboardSetup.setListFonts)
     out.append('<widget name="config" position="%d,%d" size="%d,%d" scrollbarMode="showOnDemand" transparent="1" zPosition="2" />' % g['config'])
     icon = g['icon']
-    labelOffset, labelW, labelFont = g['label']
+    labelOffset, labelW, labelH, labelFont = g['label']
+    # two lines high, centred on the icon: longer translations (Greek) wrap
+    # instead of being cut off
+    labelY = g['buttonY'] + (icon - labelH) // 2
     # each tier has its own button pictures (images/key_red_sd.png, ...)
     suffix = byTier('', '_wqhd', '_sd')
     for x, colour in zip(g['buttonX'], ('red', 'green', 'yellow', 'blue')):
         out.append('<ePixmap position="%d,%d" size="%d,%d" pixmap="%s" zPosition="3" transparent="1" alphatest="blend" />' % (x, g['buttonY'], icon, icon, pluginPath('images', 'key_%s%s.png' % (colour, suffix))))
-        out.append('<widget name="key_%s" position="%d,%d" size="%d,%d" zPosition="4" halign="left" valign="center" font="Regular;%d" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" />' % (colour, x + labelOffset, g['buttonY'], labelW, icon, labelFont))
+        out.append('<widget name="key_%s" position="%d,%d" size="%d,%d" zPosition="4" halign="left" valign="center" font="Regular;%d" transparent="1" foregroundColor="#ffffff" backgroundColor="#41000000" />' % (colour, x + labelOffset, labelY, labelW, labelH, labelFont))
     out.append('</screen>')
     return scaleSkin('\n'.join(out))
 

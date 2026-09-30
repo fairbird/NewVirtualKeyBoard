@@ -202,9 +202,10 @@ class LanguageListScreen(Screen):
     # removes an installed one. The keyboard loads the active layout when the
     # list closes. The arguments are the old interface: listValue = rows
     # ({'val': (name, locale, id)},), selIdx = selected row; the callback is
-    # not needed any more.
+    # not needed any more. With installedIds only those layouts, and OK makes
+    # one the active layout and closes the list.
 
-    def __init__(self, session, listValue=None, selIdx=None, loadVKLayout_callback=None):
+    def __init__(self, session, listValue=None, selIdx=None, loadVKLayout_callback=None, installedIds=None):
         if isFHD():
             self.skin = '''
                 <screen name="LanguageListScreen" position="center,center" size="900,826" backgroundColor="#16000000" transparent="0" title="Select Language" flags="wfNoBorder">
@@ -222,7 +223,11 @@ class LanguageListScreen(Screen):
         self.skin = scaleSkin(self.skin)
         Screen.__init__(self, session)
         self.skinName = 'LanguageListScreen'
-        self.layouts = [row[0]['val'] for row in listValue] if listValue else list(KbLayouts)
+        self.installedIds = installedIds
+        if installedIds:
+            self.layouts = [layout for layout in KbLayouts if layout[2] in installedIds]
+        else:
+            self.layouts = [row[0]['val'] for row in listValue] if listValue else list(KbLayouts)
         self.selIdx = selIdx
         self['languageList'] = LayoutList()
         self['languageList'].onSelectionChanged.append(self.updateInfo)
@@ -235,6 +240,9 @@ class LanguageListScreen(Screen):
 
     def onStart(self):
         self.setTitle(_("Keyboard layout selection"))
+        if self.installedIds:
+            # no install / remove here
+            self['info'].hide()
         self.showList(self.selIdx or 0)
 
     def showList(self, index):
@@ -254,6 +262,10 @@ class LanguageListScreen(Screen):
         if not layout:
             return
         layoutId = layout[2]
+        if self.installedIds:
+            saveActiveLayoutId(layoutId)
+            self.close()
+            return
         index = self['languageList'].getCurrentIndex()
         if os.path.exists(layoutFile(layoutId)):
             os.remove(layoutFile(layoutId))
@@ -341,6 +353,7 @@ class NewVirtualKeyBoard(Screen, SuggestionsFetcher):
         self.currentVKLayout = defaultKBLAYOUT
         self.selectedKBLayoutId = self.settings.keys_layout.value
         self.cycleFromId = None            # TEXT key: layout that failed to load
+        self.layoutBeforeLanguageKey = None  # OK long on the language key goes back to it
         self.specialKeyState = SK_NONE
         self.deadKey = u''                 # pending dead key (accent)
         self.focus = FOCUS_KEYBOARD
@@ -387,7 +400,7 @@ class NewVirtualKeyBoard(Screen, SuggestionsFetcher):
         return NumberActionMap(['WizardActions', 'DirectionActions', 'ColorActions', 'KeyboardInputActions', 'InputBoxActions', 'InputAsciiActions', 'SetupActions', 'MenuActions', 'NVKActions'], {
             'gotAsciiCode': self.keyGotAscii,
             'ok': self.keyOK,
-            'ok_repeat': self.keyOK,
+            'ok_repeat': self.keyOKRepeat,
             'back': self.keyBack,
             'left': self.keyLeft,
             'right': self.keyRight,
@@ -411,6 +424,7 @@ class NewVirtualKeyBoard(Screen, SuggestionsFetcher):
             'vk_space': self.insertSpace,
             'vk_cleartext': self.clearText,
             'vk_language': self.switchinstalledvklayout,
+            'vk_languagelist': self.languageKeyLong,
             '1': self.keyNumberGlobal,
             '2': self.keyNumberGlobal,
             '3': self.keyNumberGlobal,
@@ -532,11 +546,45 @@ class NewVirtualKeyBoard(Screen, SuggestionsFetcher):
         else:
             self['flag'].instance.hide()
 
-    def switchinstalledvklayout(self):
-        # TEXT: the next installed layout (the built-in one included)
+    def cycleLayoutIds(self):
+        # the installed layouts plus the built-in one, sorted
         ids = installedLayoutIds()
         if defaultKBLAYOUT['id'] not in ids:
             ids = sorted(ids + [defaultKBLAYOUT['id']])
+        return ids
+
+    def languageKey(self):
+        # OK on the language key: like TEXT the next installed layout; with
+        # only the built-in one the layout list, to install more (also in the
+        # settings: Install language)
+        if len(self.cycleLayoutIds()) > 1:
+            self.layoutBeforeLanguageKey = self.currentVKLayout['id']
+            self.switchinstalledvklayout()
+        else:
+            self.switchToLanguageSelection()
+
+    def languageKeyLong(self):
+        # OK long on the language key: the installed layouts to choose from.
+        # The press itself already switched to the next one: back to the
+        # layout before it, so the list starts there
+        if self.focus != FOCUS_KEYBOARD or self.currentKeyId != KEY_LANGUAGE or not self.layoutBeforeLanguageKey:
+            return
+        layoutId, self.layoutBeforeLanguageKey = self.layoutBeforeLanguageKey, None
+        if layoutId != self.currentVKLayout['id']:
+            self.getKeyboardLayout(layoutId)
+        self.cycleFromId = None
+        self.switchToLanguageSelection(installedOnly=True)
+
+    def keyOKRepeat(self):
+        # holding OK types the key again, but does not run through the
+        # layouts on the language key (OK long opens their list)
+        if self.focus == FOCUS_KEYBOARD and self.currentKeyId == KEY_LANGUAGE:
+            return
+        self.keyOK()
+
+    def switchinstalledvklayout(self):
+        # TEXT: the next installed layout (the built-in one included)
+        ids = self.cycleLayoutIds()
         start = self.cycleFromId or self.currentVKLayout['id']
         layoutId = ids[(ids.index(start) + 1) % len(ids)] if start in ids else ids[0]
         if layoutId == self.currentVKLayout['id']:
@@ -544,12 +592,13 @@ class NewVirtualKeyBoard(Screen, SuggestionsFetcher):
         # after a failed layout the next TEXT press goes on after it
         self.cycleFromId = None if self.getKeyboardLayout(layoutId) else layoutId
 
-    def switchToLanguageSelection(self):
+    def switchToLanguageSelection(self, installedOnly=False):
         # the list works with the saved layout: save the one shown first
         saveActiveLayoutId(self.selectedKBLayoutId)
-        ids = [item[2] for item in KbLayouts]
+        installedIds = self.cycleLayoutIds() if installedOnly else None
+        ids = [item[2] for item in KbLayouts if not installedIds or item[2] in installedIds]
         current = self.currentVKLayout['id']
-        self.session.openWithCallback(self.languageSelectionBack, LanguageListScreen, None, ids.index(current) if current in ids else None)
+        self.session.openWithCallback(self.languageSelectionBack, LanguageListScreen, None, ids.index(current) if current in ids else None, installedIds=installedIds)
 
     def languageSelectionBack(self, *args):
         # a layout was installed (-> active) or the shown one removed
@@ -569,7 +618,7 @@ class NewVirtualKeyBoard(Screen, SuggestionsFetcher):
             KEY_BACKSPACE: self.deleteBackward,
             KEY_DELETE: self.deleteForward,
             KEY_CLEAR: self.clearText,
-            KEY_LANGUAGE: self.switchToLanguageSelection,
+            KEY_LANGUAGE: self.languageKey,
             KEY_LEFT: self['text'].left,
             KEY_RIGHT: self['text'].right,
             # through save(), so a subclass that overrides it gets Enter

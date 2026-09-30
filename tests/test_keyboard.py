@@ -504,6 +504,12 @@ check('readLayoutFile: UTF-8 file', layouts.readLayoutFile('00000407')['locale']
 shutil.copy(os.path.join(KLE, 'kle0000040c.kle'), os.path.join(layouts.LAYOUT_DIR, '0000040c.kle'))
 check('readLayoutFile: UTF-16 file', layouts.readLayoutFile('0000040c')['id'] == '0000040c')
 check('installed ids sorted', layouts.installedLayoutIds() == ['00000407', '0000040c'])
+check('the package ships no layouts (an update brings no removed ones back)', not [n for n in os.listdir(os.path.join(PLUGIN, 'skins')) if n == 'kle'])
+layoutDir, urlread = layouts.LAYOUT_DIR, layouts.urlread
+layouts.LAYOUT_DIR = os.path.join(TMP, 'newkle') + os.sep
+layouts.urlread = lambda url, timeout: (io.open(os.path.join(KLE, 'kle0000040c.kle'), 'rb').read(), 'text/plain')
+check('download without the layout folder: created', layouts.downloadLayout('0000040c') and layouts.installedLayoutIds() == ['0000040c'])
+layouts.LAYOUT_DIR, layouts.urlread = layoutDir, urlread
 
 section('flags')
 noFlag = [x for x in layouts.KbLayouts if layouts.flagFileForLayout(x[2]).endswith('missing.png') and x[2] not in ('00120c00', '000c0c00')]
@@ -768,6 +774,54 @@ check('next TEXT goes on after the broken one', kb.currentVKLayout['id'] == '000
 kb.session = Session()
 check('broken layout via getKeyboardLayout: False + error text', kb.getKeyboardLayout('0000040c') is False and 'failed' in kb.session.last()[1]['text'])
 shutil.copy(os.path.join(KLE, 'kle0000040c.kle'), layouts.layoutFile('0000040c'))
+kb = newKeyboard()
+kb.loadVKLayout(layouts.defaultKBLAYOUT)
+opened = []
+kb.switchToLanguageSelection = lambda: opened.append(1)
+kb.processKeyId(vk.KEY_LANGUAGE)
+check('OK on the language key with installed layouts: next layout, no list', kb.currentVKLayout['id'] == '00000407' and not opened, (kb.currentVKLayout['id'], opened))
+kb = newKeyboard()
+kb.loadVKLayout(layouts.defaultKBLAYOUT)
+kb.currentKeyId = vk.KEY_LANGUAGE
+kb.keyOK()
+kb.keyOKRepeat()
+check('holding OK on the language key: one switch only', kb.currentVKLayout['id'] == '00000407', kb.currentVKLayout['id'])
+kb.languageKeyLong()
+args, kwargs, cb = kb.session.last()
+check('OK long on the language key: back to the layout before, list of the installed ones',
+      kb.currentVKLayout['id'] == '00000809' and args[0] is vk.LanguageListScreen and kwargs.get('installedIds') == kb.cycleLayoutIds(), (kb.currentVKLayout['id'], kwargs))
+screen = vk.LanguageListScreen(Session(), None, args[2], installedIds=kwargs['installedIds'])
+check('installed list: only those layouts, starts on the current one',
+      sorted(x[2] for x in screen.layouts) == kb.cycleLayoutIds() and screen.layouts[args[2]][2] == '00000809', ([x[2] for x in screen.layouts], args[2]))
+screen['languageList'] = FakeList()
+screen['languageList'].current = layouts.layoutItem('00000407')
+closed = []
+screen.close = lambda *a: closed.append(1)
+screen.keyOK()
+check('installed list: OK makes it active and closes, nothing removed', cfg.keys_layout.value == '00000407' and closed and os.path.exists(layouts.layoutFile('00000407')))
+kb.languageSelectionBack()
+check('the keyboard shows the chosen layout', kb.currentVKLayout['id'] == '00000407', kb.currentVKLayout['id'])
+count = len(kb.session.opened)
+kb.languageKeyLong()
+check('OK long without an OK press on the language key before: nothing', len(kb.session.opened) == count)
+typed = []
+kb.keyOK = lambda: typed.append(kb.currentKeyId)
+kb.keyOKRepeat()
+kb.currentKeyId = 1
+kb.keyOKRepeat()
+check('holding OK: repeats on other keys, not on the language key', typed == [1], typed)
+kb = newKeyboard()
+kb.loadVKLayout(layouts.defaultKBLAYOUT)
+kb.switchToLanguageSelection = lambda: opened.append(1)
+installed = [layouts.layoutFile(i) for i in layouts.installedLayoutIds()]
+saved = dict((f, io.open(f, 'rb').read()) for f in installed)
+for f in installed:
+    os.remove(f)
+kb.processKeyId(vk.KEY_LANGUAGE)
+check('OK on the language key with only the built-in layout: the list', opened == [1], opened)
+for f, data in saved.items():
+    with io.open(f, 'wb') as out:
+        out.write(data)
 
 section('bug 8: numeric keypad only when asked for or guessed')
 sess = Session()
@@ -956,10 +1010,12 @@ st.parseData(installer.replace(('version="%s"' % setupmod.VER).encode(), b'versi
 check('no prompt after the settings closed', len(st.session.opened) == 1)
 cfg.updateonline.value = True
 setupmod.urlread = lambda url, timeout: (installer.replace(('version="%s"' % setupmod.VER).encode(), b'version="13.10"'), 'text/plain')
+pluginVer, setupmod.VER = setupmod.VER, '13.9'
 st = setupmod.nvKeyboardSetup(Session(), False, None)
 st.onStart()
 runQueue()
 check('online check: 13.10 is offered on 13.9 (float said no)', st.session.opened and '13.10' in st.session.last()[0][1])
+setupmod.VER = pluginVer
 cfg.updateonline.value = False
 
 section('packaging')
@@ -969,6 +1025,48 @@ prerm = readText(os.path.join(REPO, 'CI', 'prerm.sh'))
 body = lambda text: text[text.index('case "$1"'):text.index('exit 0\n', text.index('fi\n')) + 7].replace('$D/', '/')
 bbPrerm = bb[bb.index('pkg_prerm'):]
 check('.bb prerm == CI/prerm.sh', body(bbPrerm) == body(prerm))
+postinst = readText(os.path.join(REPO, 'CI', 'postinst.sh'))
+bbPostinst = bb[bb.index('pkg_postinst'):]
+bbPostinst = bbPostinst[bbPostinst.index('#!/bin/sh'):bbPostinst.index('\n}\n') + 1]
+check('.bb postinst == CI/postinst.sh', bbPostinst == postinst)
+check('installer.sh runs CI/postinst.sh', 'sh "NewVirtualKeyBoard-main/CI/postinst.sh"' in installer.decode('utf-8'))
+fakeRoot = tempfile.mkdtemp()
+fakeScreens = os.path.join(fakeRoot, 'usr/lib/enigma2/python/Screens')
+os.makedirs(fakeScreens)
+os.makedirs(os.path.join(fakeRoot, 'usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard'))
+os.makedirs(os.path.join(fakeRoot, 'etc/enigma2'))
+try:
+    os.symlink(fakeRoot, os.path.join(fakeRoot, 'link'))
+    canLink = True
+except (AttributeError, NotImplementedError, OSError):
+    canLink = False
+if canLink and not (shutil.which('sh') if PY3 else os.path.exists('/bin/sh')):
+    canLink = False
+if canLink:
+    import subprocess  # noqa: E402
+    script = os.path.join(fakeRoot, 'postinst')
+    with io.open(script, 'w', encoding='utf-8', newline='\n') as f:
+        f.write(postinst.replace('/usr/lib', fakeRoot + '/usr/lib').replace('/etc/enigma2', fakeRoot + '/etc/enigma2'))
+    with io.open(os.path.join(fakeScreens, 'VirtualKeyBoard.pyc'), 'wb') as f:
+        f.write(b'image')
+
+    def runPostinst(env=None):
+        with open(os.devnull, 'w') as null:
+            subprocess.call(['sh', script], stdout=null, env=env)
+        return os.path.islink(os.path.join(fakeScreens, 'VirtualKeyBoard.py'))
+
+    check('postinst without the setting: image keyboard stays', not runPostinst() and os.path.exists(os.path.join(fakeScreens, 'VirtualKeyBoard.pyc')))
+    with io.open(os.path.join(fakeRoot, 'etc/enigma2/settings'), 'w', encoding='utf-8', newline='\n') as f:
+        f.write(u'config.NewVirtualKeyBoard.firsttime=False\nconfig.NewVirtualKeyBoard.textinput=NewVirtualKeyBoard\n')
+    env = dict(os.environ, D='/image')
+    check('postinst while an image is built: nothing', not runPostinst(env))
+    check('postinst with the saved setting: the new keyboard, image one as backup',
+          runPostinst() and not os.path.exists(os.path.join(fakeScreens, 'VirtualKeyBoard.pyc'))
+          and io.open(os.path.join(fakeScreens, 'VirtualKeyBoard_backup.pyc'), 'rb').read() == b'image')
+    check('postinst again: backup kept', runPostinst() and io.open(os.path.join(fakeScreens, 'VirtualKeyBoard_backup.pyc'), 'rb').read() == b'image')
+else:
+    print('     (postinst run skipped: no symlinks or sh here)')
+shutil.rmtree(fakeRoot, ignore_errors=True)
 check('installer.sh strips the translation sources', "-name '*.po'" in installer.decode('utf-8'))
 
 # ==== translations (gettext, locale/) ============================================================
@@ -1032,7 +1130,8 @@ else:
 section('keymap')
 keymap = ET.parse(os.path.join(PLUGIN, 'keymap.xml')).getroot()
 maps = dict((m.get('context'), dict((k.get('id'), k.get('mapto')) for k in m)) for m in keymap)
-check('keymap NVKActions', maps.get('NVKActions') == {'KEY_PREVIOUS': 'vk_prevpanel', 'KEY_NEXT': 'vk_nextpanel', 'KEY_FASTFORWARD': 'vk_space', 'KEY_REWIND': 'vk_cleartext', 'KEY_PVR': 'vk_nextpanel', 'KEY_TEXT': 'vk_language', 'KEY_INFO': 'vk_help', 'KEY_HELP': 'vk_help'}, maps)
+check('keymap NVKActions', maps.get('NVKActions') == {'KEY_PREVIOUS': 'vk_prevpanel', 'KEY_NEXT': 'vk_nextpanel', 'KEY_FASTFORWARD': 'vk_space', 'KEY_REWIND': 'vk_cleartext', 'KEY_PVR': 'vk_nextpanel', 'KEY_TEXT': 'vk_language', 'KEY_OK': 'vk_languagelist', 'KEY_INFO': 'vk_help', 'KEY_HELP': 'vk_help'}, maps)
+check('keymap: OK long only', [k.get('flags') for k in keymap.iter('key') if k.get('id') == 'KEY_OK'] == ['l'])
 actions = newKeyboard()['actions']
 check('actions: yellow/blue/TEXT/menu', actions['yellow'].__name__ == 'keyYellow' and actions['blue'].__name__ == 'keyBlue' and actions['vk_language'].__name__ == 'switchinstalledvklayout' and actions['menu'].__name__ == 'showSettings')
 check('INFO only through the own keymap (no second "info" action: help would open twice)', actions['vk_help'].__name__ == 'showHelp' and 'info' not in actions)

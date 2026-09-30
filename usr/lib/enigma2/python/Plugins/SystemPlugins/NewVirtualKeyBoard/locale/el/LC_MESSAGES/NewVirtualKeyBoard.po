@@ -1,66 +1,71 @@
-# NewVirtualKeyBoard - el
-# Greek translation by giorbak Thank you
-# Converted from language/el.py (titleN) to gettext.
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: NewVirtualKeyBoard\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-09-30 11:20+0200\n"
-"PO-Revision-Date: 2026-09-30 00:37+0200\n"
-"Last-Translator: giorbak\n"
-"Language-Team: \n"
+"PO-Revision-Date: 2026-09-30 19:42+0300\n"
+"Last-Translator: \n"
+"Language-Team: giorbak\n"
 "Language: el\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.9\n"
+"X-Poedit-SourceCharset: UTF-8\n"
 
 msgid ""
 "\n"
 "Press OK or Exit to abort!"
 msgstr ""
+"\n"
+"Πατήστε OK ή EXIT για ακύρωση!"
 
 msgid "0-9 - Text input like on a phone, when the input field is selected"
-msgstr ""
+msgstr "0-9 - Εισαγωγή κειμένου όπως σε τηλέφωνο, όταν είναι επιλεγμένο το πεδίο εισαγωγής"
 
 msgid "Alt"
-msgstr ""
+msgstr "Alt"
 
 msgid "Background color"
-msgstr ""
+msgstr "Χρώμα φόντου"
 
 msgid "Black"
-msgstr ""
+msgstr "Μαύρο"
 
 msgid "Blue - Shift"
-msgstr ""
+msgstr "Μπλε - Shift"
 
 msgid "Cancel"
-msgstr "Άκυρο"
+msgstr "Ακύρωση"
 
 msgid "Cancel execution?"
-msgstr ""
+msgstr "Να γίνει ακύρωση της εκτέλεσης;"
 
 msgid "Caps"
-msgstr ""
+msgstr "Caps"
 
 msgid "Clear"
-msgstr ""
+msgstr "Clear"
 
 msgid "Clear search history"
-msgstr ""
+msgstr "Εκκαθάριση ιστορικού αναζήτησης"
 
 msgid "Console"
-msgstr ""
+msgstr "Κονσόλα"
 
 msgid "Ctrl"
-msgstr ""
+msgstr "Ctrl"
 
 msgid "Default"
-msgstr ""
+msgstr "Προεπιλογή"
 
 msgid "Delete the search history?"
-msgstr ""
+msgstr "Να γίνει διαγραφή του ιστορικού αναζήτησης;"
 
 msgid "Do you want to install it now?"
 msgstr "Θέλετε να την εγκαταστήσετε τώρα;"
@@ -69,42 +74,42 @@ msgid "Enable/Disable Checking Online Update"
 msgstr "Ενεργοποίηση/απενεργοποίηση ελέγχου online ενημέρωσης"
 
 msgid "Enter"
-msgstr ""
+msgstr "Enter"
 
 #. TRANSLATORS: key caps of the on-screen keyboard - keep them as
 #. short as the English ones, the keys are small
 msgid "Esc"
-msgstr ""
+msgstr "Esc"
 
 msgid "Execution finished!!"
-msgstr ""
+msgstr "Η εκτέλεση ολοκληρώθηκε!!"
 
 msgid "Execution progress:"
-msgstr ""
+msgstr "Πρόοδος εκτέλεσης:"
 
 msgid "Exit"
-msgstr ""
+msgstr "Exit"
 
 msgid "Exit - Close without taking the text"
-msgstr ""
+msgstr "Exit - Κλείσιμο χωρίς λήψη του κειμένου"
 
 msgid "Failed to download language, try later"
 msgstr "Αποτυχία λήψης της γλώσσας, δοκιμάστε αργότερα"
 
 msgid "Fast forward - Insert space"
-msgstr ""
+msgstr "Γρήγορη προώθηση - Εισαγωγή κενού διαστήματος"
 
 msgid "Font size (-10 to +30)"
-msgstr ""
+msgstr "Μέγεθος γραμματοσειράς (-10 έως +30)"
 
 msgid "Green - Enter: confirm the text and close"
-msgstr ""
+msgstr "Πράσινο - Enter: επιβεβαίωση του κειμένου και κλείσιμο"
 
 msgid "Help"
-msgstr ""
+msgstr "Help"
 
 msgid "Hide"
-msgstr ""
+msgstr "Απόκρυψη"
 
 msgid "Image virtual keyboard"
 msgstr "Εικονικό πληκτρολόγιο του image"
@@ -119,7 +124,7 @@ msgid "Installing last update, enigma will be started after install"
 msgstr "Γίνεται εγκατάσταση της τελευταίας ενημέρωσης, το enigma θα ξεκινήσει μετά την εγκατάσταση"
 
 msgid "Keyboard layout selection"
-msgstr ""
+msgstr "Επιλογή διάταξης πληκτρολογίου"
 
 msgid "Language downloaded successfully, exit from install"
 msgstr "Η γλώσσα ελήφθη με επιτυχία, έξοδος από την εγκατάσταση"
@@ -128,60 +133,60 @@ msgid "Language removed from installed package"
 msgstr "Η γλώσσα αφαιρέθηκε από το εγκατεστημένο πακέτο"
 
 msgid "Left"
-msgstr ""
+msgstr "Αριστερά"
 
 msgid "Left / Right at the edge of the keyboard - Switch to the suggestions or the search history"
-msgstr ""
+msgstr "Αριστερά / Δεξιά στην άκρη του πληκτρολογίου - Εναλλαγή στις προτάσεις ή στο ιστορικό αναζήτησης"
 
 #, python-format
 msgid "Loading the keyboard layout %s failed"
-msgstr ""
+msgstr "Αποτυχία φόρτωσης της διάταξης πληκτρολογίου %s"
 
 msgid "Menu - Settings, install languages, clear the search history"
-msgstr ""
+msgstr "Menu - Ρυθμίσεις, εγκατάσταση γλωσσών, εκκαθάριση ιστορικού αναζήτησης"
 
 msgid "Mostly transparent"
-msgstr ""
+msgstr "Σχεδόν διαφανές"
 
 msgid "New Virtual Keyboard"
 msgstr "Νέο εικονικό πληκτρολόγιο"
 
 msgid "New Virtual Keyboard - Original code SamSamSam (e2iplayer). Contributors: mfaraj57 and Fairbird. Skin and amends: KiddaC"
-msgstr "Νέο εικονικό πληκτρολόγιο - Αρχικός κώδικας SamSamSam (e2iplayer). Συνεργάτες: mfaraj57 και Fairbird. Θέμα και τροποποιήσεις: KiddaC"
+msgstr "New Virtual KeyBoard - Αρχικός κώδικας SamSamSam (e2iplayer). Συνεργάτες: mfaraj57 και Fairbird. Θέμα και τροποποιήσεις: KiddaC"
 
 msgid "New Virtual Keyboard Settings"
-msgstr ""
+msgstr "Ρυθμίσεις New Virtual KeyBoard"
 
 msgid "New version"
 msgstr "Νέα έκδοση"
 
 #, python-format
 msgid "NewVirtualKeyBoard  V %s"
-msgstr ""
+msgstr "NewVirtualKeyBoard  V %s"
 
 msgid "NewVirtualKeyBoard setup"
-msgstr ""
+msgstr "Ρύθμιση NewVirtualKeyBoard"
 
 msgid "Numeric keypad"
-msgstr ""
+msgstr "Αριθμητικό πληκτρολόγιο"
 
 msgid "Numeric keypad for numbers"
-msgstr ""
+msgstr "Αριθμητικό πληκτρολόγιο για αριθμούς"
 
 msgid "OK - Type the selected key / take the selected suggestion or history entry"
-msgstr ""
+msgstr "OK - Πληκτρολόγηση του επιλεγμένου πλήκτρου / επιλογή της επιλεγμένης πρότασης ή καταχώρισης ιστορικού"
 
 msgid "OK / GREEN - accept, EXIT - cancel"
-msgstr ""
+msgstr "OK / ΠΡΑΣΙΝΟ - Αποδοχή, EXIT - Ακύρωση"
 
 msgid "PVR - Switch between keyboard, suggestions and search history"
-msgstr ""
+msgstr "PVR - Εναλλαγή μεταξύ πληκτρολογίου, προτάσεων και ιστορικού αναζήτησης"
 
 msgid "Page Down - Clear input text"
-msgstr "Page Down - Εκκαθάριση κειμένου εισαγωγής"
+msgstr "Σελίδα κάτω - Εκκαθάριση κειμένου εισαγωγής"
 
 msgid "Page Up - Insert space"
-msgstr "Page Up - Εισαγωγή διαστήματος"
+msgstr "Σελίδα πάνω - Εισαγωγή διαστήματος"
 
 msgid "Press ok to install language"
 msgstr "Πατήστε OK για να εγκαταστήσετε τη γλώσσα"
@@ -190,25 +195,25 @@ msgid "Press ok to remove language"
 msgstr "Πατήστε OK για να αφαιρέσετε τη γλώσσα"
 
 msgid "Previous / Next - Switch between keyboard, suggestions and search history"
-msgstr ""
+msgstr "Προηγούμενο / Επόμενο - Εναλλαγή μεταξύ πληκτρολογίου, προτάσεων και ιστορικού αναζήτησης"
 
 msgid "Red - Backspace"
-msgstr ""
+msgstr "Κόκκινο - Backspace"
 
 msgid "Remember last search entry"
-msgstr ""
+msgstr "Απομνημόνευση τελευταίας καταχώρισης αναζήτησης"
 
 msgid "Restart GUI"
-msgstr ""
+msgstr "Επανεκκίνηση του GUI"
 
 msgid "Restart enigma2 to load new settings?"
 msgstr "Να γίνει επανεκκίνηση του enigma2 για να φορτωθούν οι νέες ρυθμίσεις;"
 
 msgid "Rewind - Clear input text"
-msgstr ""
+msgstr "Επαναφορά - Εκκαθάριση κειμένου εισαγωγής"
 
 msgid "Right"
-msgstr ""
+msgstr "Δεξιά"
 
 msgid "Save"
 msgstr "Αποθήκευση"
@@ -217,58 +222,58 @@ msgid "Search history"
 msgstr "Ιστορικό αναζητήσεων"
 
 msgid "Search history entries (1-99999)"
-msgstr ""
+msgstr "Καταχωρίσεις ιστορικού αναζήτησης (1-99999)"
 
 msgid "Semi-transparent"
-msgstr ""
+msgstr "Ημιδιαφανές"
 
 msgid "Setup virtual keyboard"
-msgstr ""
+msgstr "Ρύθμιση εικονικού πληκτρολογίου"
 
 msgid "Shift"
-msgstr ""
+msgstr "Shift"
 
 msgid "Show flags"
-msgstr ""
+msgstr "Εμφάνιση σημαιών"
 
 msgid "Show plugin in Plugin Browser"
-msgstr "Εμφάνιση του πρόσθετου στη Περιήγηση πρόσθετων"
+msgstr "Εμφάνιση NewVirtualKeyBoard στη Περιήγηση πρόσθετων"
 
 msgid "Show search history"
-msgstr ""
+msgstr "Εμφάνιση ιστορικού αναζήτησης"
 
 msgid "Show suggestions"
-msgstr ""
+msgstr "Εμφάνιση προτάσεων"
 
 msgid "Suggestions"
-msgstr ""
+msgstr "Προτάσεις"
 
 msgid "Suggestions provider"
-msgstr ""
+msgstr "Πάροχος προτάσεων"
 
 msgid "Switching the keyboard failed"
-msgstr ""
+msgstr "Αποτυχία εναλλαγής του πληκτρολογίου"
 
 msgid "Text - Switch language"
-msgstr ""
+msgstr "Text - Εναλλαγή γλώσσας"
 
 msgid "Text field alignment"
-msgstr ""
+msgstr "Στοίχιση πεδίου κειμένου"
 
 msgid "Text input method-keyboard"
 msgstr "Μέθοδος εισαγωγής κειμένου-πληκτρολόγιο"
 
 msgid "The backup of the image keyboard is missing, the New Virtual Keyboard stays active."
-msgstr ""
+msgstr "Λείπει το αντίγραφο ασφαλείας του πληκτρολογίου του image, το New Virtual Keyboard παραμένει ενεργό."
 
 msgid "Transparent"
-msgstr ""
+msgstr "Διαφανές"
 
 msgid "Virtual Keyboard"
-msgstr ""
+msgstr "Εικονικό πληκτρολόγιο"
 
 msgid "Yellow - AltGr"
-msgstr ""
+msgstr "Κίτρινο - AltGr"
 
 msgid "is available"
 msgstr "είναι διαθέσιμη"

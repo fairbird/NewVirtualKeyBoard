@@ -8,6 +8,8 @@
         <key id="KEY_REWIND"      mapto="vk_cleartext" flags="m" />
         <key id="KEY_PVR"         mapto="vk_nextpanel" flags="m" />
         <key id="KEY_TEXT"        mapto="vk_language"  flags="m" />
+        <!-- OK long on the language key: the installed layouts -->
+        <key id="KEY_OK"          mapto="vk_languagelist" flags="l" />
         <!-- key help: not every image has an "info" action in the
              contexts the keyboard uses (VTi) -->
         <key id="KEY_INFO"        mapto="vk_help"      flags="m" />

@@ -116,6 +116,9 @@ def downloadLayout(layoutId):
     # thread, so with a timeout)
     try:
         data, contentType = urlread(serverLayoutFile(layoutId), 10)
+        # the package ships no layouts, so the folder may not exist yet
+        if not os.path.isdir(LAYOUT_DIR):
+            os.makedirs(LAYOUT_DIR)
         with open(layoutFile(layoutId), 'wb') as f:
             f.write(data)
         return True

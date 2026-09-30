@@ -1,9 +1,16 @@
 #!/bin/sh
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
-version="13.9"
+version="13.10"
 description="
 What is NEW :
+- OK on the language key switches between the installed languages,
+  OK long opens a list of only those
+- the new keyboard is selected again after a reinstall when the saved
+  settings select it
+- updates no longer bring removed languages back
+- Greek translation complete, long button labels wrap in the settings
+Since 13.9 :
 - all 218 Windows keyboard layouts, drawn like the real keyboard (ISO 48 keys)
 - numeric keypad for number fields, key help for all keys
 - YELLOW = AltGr, BLUE = Shift, TEXT = language, PVR = switch lists
@@ -55,6 +62,8 @@ if ! cp -r "NewVirtualKeyBoard-main/usr" /; then
 	rm -rf "$TMPDIR"
 	exit 1
 fi
+# same as the ipk: the new keyboard again when the saved settings select it
+sh "NewVirtualKeyBoard-main/CI/postinst.sh"
 cd /tmp
 rm -rf "$TMPDIR"
 

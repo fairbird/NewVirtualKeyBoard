@@ -25,15 +25,6 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PLUGIN_REL = 'usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard'
 PACKAGE = 'enigma2-plugin-systemplugins-newvirtualkeyboard'
 
-# leftovers of versions installed with installer.sh before 13.9 (the prerm
-# script is CI/prerm.sh)
-POSTINST = """#!/bin/sh
-P=/usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard
-rm -rf $P/language $P/language_config.py* $P/compat.py* $P/skins/NewVirtualKeyBoard*.py* $P/skins/__init__.py* $P/skins/icons/vk
-echo "NewVirtualKeyBoard installed - restart enigma2 and select the new keyboard in Menu > System > NewVirtualKeyBoard setup"
-exit 0
-"""
-
 
 def read(path, mode='r'):
     with open(os.path.join(REPO, path), mode) as f:
@@ -136,7 +127,7 @@ def main():
         'Description: ' + desc[0],
     ] + desc[1:]) + '\n'
     control_tgz = tar_gz([('./', None, 0o755), ('./control', control.encode('utf-8'), 0o644),
-                          ('./postinst', POSTINST.encode(), 0o755), ('./prerm', read('CI/prerm.sh', 'rb'), 0o755)], mtime)
+                          ('./postinst', read('CI/postinst.sh', 'rb'), 0o755), ('./prerm', read('CI/prerm.sh', 'rb'), 0o755)], mtime)
     data_tgz = tar_gz(data_members(files), mtime)
     package = ar([('debian-binary', b'2.0\n'), ('control.tar.gz', control_tgz), ('data.tar.gz', data_tgz)], mtime)
     outputs = []
