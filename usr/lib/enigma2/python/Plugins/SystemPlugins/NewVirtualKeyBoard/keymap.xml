@@ -1,0 +1,16 @@
+<keymap>
+    <!-- extra keys of the keyboard; enigma2 loads a plugin's keymap.xml on its
+         plugin scan (same as E2iPlayer's keymap) -->
+    <map context="NVKActions">
+        <key id="KEY_PREVIOUS"    mapto="vk_prevpanel" flags="m" />
+        <key id="KEY_NEXT"        mapto="vk_nextpanel" flags="m" />
+        <key id="KEY_FASTFORWARD" mapto="vk_space"     flags="m" />
+        <key id="KEY_REWIND"      mapto="vk_cleartext" flags="m" />
+        <key id="KEY_PVR"         mapto="vk_nextpanel" flags="m" />
+        <key id="KEY_TEXT"        mapto="vk_language"  flags="m" />
+        <!-- key help: not every image has an "info" action in the
+             contexts the keyboard uses (VTi) -->
+        <key id="KEY_INFO"        mapto="vk_help"      flags="m" />
+        <key id="KEY_HELP"        mapto="vk_help"      flags="m" />
+    </map>
+</keymap>

@@ -1,0 +1,276 @@
+# NewVirtualKeyBoard - de
+# GERMAN translation by (Masta2002) Thank you
+# Converted from language/de.py (titleN) to gettext.
+msgid ""
+msgstr ""
+"Project-Id-Version: NewVirtualKeyBoard\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-09-30 11:20+0200\n"
+"PO-Revision-Date: 2026-09-30 00:37+0200\n"
+"Last-Translator: Masta2002\n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid ""
+"\n"
+"Press OK or Exit to abort!"
+msgstr ""
+"\n"
+"OK oder EXIT drücken zum Beenden!"
+
+msgid "0-9 - Text input like on a phone, when the input field is selected"
+msgstr "0-9 - Texteingabe wie am Handy, wenn das Eingabefeld ausgewählt ist"
+
+msgid "Alt"
+msgstr "Alt"
+
+msgid "Background color"
+msgstr "Hintergrundfarbe"
+
+msgid "Black"
+msgstr "Schwarz"
+
+msgid "Blue - Shift"
+msgstr "Blau - Umschalt"
+
+msgid "Cancel"
+msgstr "Abbrechen"
+
+msgid "Cancel execution?"
+msgstr "Ausführung abbrechen?"
+
+msgid "Caps"
+msgstr "Caps"
+
+msgid "Clear"
+msgstr "Leeren"
+
+msgid "Clear search history"
+msgstr "Suchverlauf löschen"
+
+msgid "Console"
+msgstr "Konsole"
+
+msgid "Ctrl"
+msgstr "Strg"
+
+msgid "Default"
+msgstr "Standard"
+
+msgid "Delete the search history?"
+msgstr "Den Suchverlauf löschen?"
+
+msgid "Do you want to install it now?"
+msgstr "Möchten Sie jetzt installieren?"
+
+msgid "Enable/Disable Checking Online Update"
+msgstr "Online-Update-Prüfung aktivieren/deaktivieren"
+
+msgid "Enter"
+msgstr "Enter"
+
+#. TRANSLATORS: key caps of the on-screen keyboard - keep them as
+#. short as the English ones, the keys are small
+msgid "Esc"
+msgstr "Esc"
+
+msgid "Execution finished!!"
+msgstr "Ausführung beendet!"
+
+msgid "Execution progress:"
+msgstr "Fortschritt der Ausführung:"
+
+msgid "Exit"
+msgstr "Beenden"
+
+msgid "Exit - Close without taking the text"
+msgstr "Exit - Schließen, ohne den Text zu übernehmen"
+
+msgid "Failed to download language, try later"
+msgstr "Herunterladen der Sprache ist fehlgeschlagen, versuche es später erneut."
+
+msgid "Fast forward - Insert space"
+msgstr "Vorspulen - Leerzeichen einfügen"
+
+msgid "Font size (-10 to +30)"
+msgstr "Schriftgröße (-10 bis +30)"
+
+msgid "Green - Enter: confirm the text and close"
+msgstr "Grün - Enter: Text übernehmen und schließen"
+
+msgid "Help"
+msgstr "Hilfe"
+
+msgid "Hide"
+msgstr "Ausblenden"
+
+msgid "Image virtual keyboard"
+msgstr "Image internes VirtualKeyboard"
+
+msgid "Info - Show this screen again"
+msgstr "Info – Diesen Bildschirm erneut anzeigen"
+
+msgid "Install language"
+msgstr "Sprache installieren"
+
+msgid "Installing last update, enigma will be started after install"
+msgstr "Installiere letztes Update, Enigma wird nach der Installation gestartet."
+
+msgid "Keyboard layout selection"
+msgstr "Tastaturlayout-Auswahl"
+
+msgid "Language downloaded successfully, exit from install"
+msgstr "Sprache erfolgreich heruntergeladen, Installation beenden"
+
+msgid "Language removed from installed package"
+msgstr "Sprache aus installiertem Paket entfernt"
+
+msgid "Left"
+msgstr "Links"
+
+msgid "Left / Right at the edge of the keyboard - Switch to the suggestions or the search history"
+msgstr "Links / Rechts am Rand der Tastatur - Zu den Vorschlägen oder zum Suchverlauf wechseln"
+
+#, python-format
+msgid "Loading the keyboard layout %s failed"
+msgstr "Das Tastaturlayout %s konnte nicht geladen werden"
+
+msgid "Menu - Settings, install languages, clear the search history"
+msgstr "Menü - Einstellungen, Sprachen installieren, Suchverlauf löschen"
+
+msgid "Mostly transparent"
+msgstr "Überwiegend transparent"
+
+msgid "New Virtual Keyboard"
+msgstr "NewVirtualKeyboard"
+
+msgid "New Virtual Keyboard - Original code SamSamSam (e2iplayer). Contributors: mfaraj57 and Fairbird. Skin and amends: KiddaC"
+msgstr "NewVirtualKeyboard - Originalcode SamSamSam (e2iplayer). Mitwirkende: mfaraj57 und Fairbird. Skin und Änderungen: KiddaC"
+
+msgid "New Virtual Keyboard Settings"
+msgstr "NewVirtualKeyboard Einstellungen"
+
+msgid "New version"
+msgstr "Neue Version"
+
+#, python-format
+msgid "NewVirtualKeyBoard  V %s"
+msgstr "NewVirtualKeyBoard  V %s"
+
+msgid "NewVirtualKeyBoard setup"
+msgstr "NewVirtualKeyBoard Einstellungen"
+
+msgid "Numeric keypad"
+msgstr "Ziffernblock"
+
+msgid "Numeric keypad for numbers"
+msgstr "Ziffernblock für Zahlenfelder"
+
+msgid "OK - Type the selected key / take the selected suggestion or history entry"
+msgstr "OK - Ausgewählte Taste tippen / ausgewählten Vorschlag oder Verlaufseintrag übernehmen"
+
+msgid "OK / GREEN - accept, EXIT - cancel"
+msgstr "OK / GRÜN - übernehmen, EXIT - abbrechen"
+
+msgid "PVR - Switch between keyboard, suggestions and search history"
+msgstr "PVR - Zwischen Tastatur, Vorschlägen und Suchverlauf wechseln"
+
+msgid "Page Down - Clear input text"
+msgstr "Seite runter - Eingegebenen Text löschen"
+
+msgid "Page Up - Insert space"
+msgstr "Seite hoch - Leerzeichen einfügen"
+
+msgid "Press ok to install language"
+msgstr "Drücke OK, um die Sprache zu installieren."
+
+msgid "Press ok to remove language"
+msgstr "Drücke OK, um die Sprache zu entfernen."
+
+msgid "Previous / Next - Switch between keyboard, suggestions and search history"
+msgstr "Zurück / Weiter - Zwischen Tastatur, Vorschlägen und Suchverlauf wechseln"
+
+msgid "Red - Backspace"
+msgstr "Rot - Rückschritt"
+
+msgid "Remember last search entry"
+msgstr "Letzte Suche merken"
+
+msgid "Restart GUI"
+msgstr "GUI neu starten"
+
+msgid "Restart enigma2 to load new settings?"
+msgstr "Enigma2 neu starten, um neue Einstellungen zu laden?"
+
+msgid "Rewind - Clear input text"
+msgstr "Zurückspulen - Eingegebenen Text löschen"
+
+msgid "Right"
+msgstr "Rechts"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Search history"
+msgstr "Suchverlauf"
+
+msgid "Search history entries (1-99999)"
+msgstr "Einträge im Suchverlauf (1-99999)"
+
+msgid "Semi-transparent"
+msgstr "Halbtransparent"
+
+msgid "Setup virtual keyboard"
+msgstr "Virtuelle Tastatur einrichten"
+
+msgid "Shift"
+msgstr "Umschalt"
+
+msgid "Show flags"
+msgstr "Flaggen anzeigen"
+
+msgid "Show plugin in Plugin Browser"
+msgstr "Plugin im Plugin-Browser anzeigen (Neustart von E2 erforderlich)"
+
+msgid "Show search history"
+msgstr "Suchverlauf anzeigen"
+
+msgid "Show suggestions"
+msgstr "Vorschläge anzeigen"
+
+msgid "Suggestions"
+msgstr "Vorschläge"
+
+msgid "Suggestions provider"
+msgstr "Anbieter der Vorschläge"
+
+msgid "Switching the keyboard failed"
+msgstr "Umschalten der Tastatur fehlgeschlagen"
+
+msgid "Text - Switch language"
+msgstr "Text - Sprache wechseln"
+
+msgid "Text field alignment"
+msgstr "Ausrichtung des Textfelds"
+
+msgid "Text input method-keyboard"
+msgstr "Texteingabemethode – Tastatur"
+
+msgid "The backup of the image keyboard is missing, the New Virtual Keyboard stays active."
+msgstr "Die Sicherung der Image-Tastatur fehlt, das NewVirtualKeyboard bleibt aktiv."
+
+msgid "Transparent"
+msgstr "Transparent"
+
+msgid "Virtual Keyboard"
+msgstr "Virtuelle Tastatur"
+
+msgid "Yellow - AltGr"
+msgstr "Gelb - AltGr"
+
+msgid "is available"
+msgstr "ist verfügbar"

@@ -4,44 +4,28 @@
 from Plugins.Plugin import PluginDescriptor
 from Components.config import config
 
-from Plugins.SystemPlugins.NewVirtualKeyBoard.setup import *
-from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import *
-from Plugins.SystemPlugins.NewVirtualKeyBoard.language_config import initialize_config
+from Plugins.SystemPlugins.NewVirtualKeyBoard import _
+from Plugins.SystemPlugins.NewVirtualKeyBoard.setup import nvKeyboardSetup  # also defines config.NewVirtualKeyBoard
+from Plugins.SystemPlugins.NewVirtualKeyBoard.tools import isFHD
 
-# Initialize and save configuration
-initialize_config(config)
-configfile.save()
 
 def main(session, **kwargs):
-	from .setup import nvKeyboardSetup
-	session.open(nvKeyboardSetup)
+    session.open(nvKeyboardSetup)
 
 
 def menu(menuid, **kwargs):
-	if menuid == 'system':
-		return [(_('VirtualKeyBoard setup'), main, 'virtulkeyBoard_setup', None)]
-	else:
-		return []
+    if menuid == 'system':
+        return [(_('NewVirtualKeyBoard setup'), main, 'virtulkeyBoard_setup', None)]
+    return []
 
-if isFHD():
-	ICONFILE = 'images/plugin-icon.png'
-else:
-	ICONFILE = 'images/plugin-icon_sd.png'
-	
-DES = (_('Setup virtual keyboard'))
-PNAME = (_('VirtualKeyboard'))
-pluginlist = PluginDescriptor(name=PNAME, description=DES, where=PluginDescriptor.WHERE_PLUGINMENU, icon=ICONFILE, fnc=main, needsRestart=False)
 
 def Plugins(**kwargs):
-	result = [
-		PluginDescriptor(
-			name=PNAME,
-			description = DES,
-			where = PluginDescriptor.WHERE_MENU,
-			fnc = menu,
-			needsRestart=False
-		),
-	]
-	if config.NewVirtualKeyBoard.showinplugins.value:
-		result.append(pluginlist)
-	return result
+    # the plugin's name, not translated (was "VirtualKeyboard", like the
+    # image's own keyboard)
+    name = 'NewVirtualKeyBoard'
+    description = _('Setup virtual keyboard')
+    result = [PluginDescriptor(name=name, description=description, where=PluginDescriptor.WHERE_MENU, fnc=menu, needsRestart=False)]
+    if config.NewVirtualKeyBoard.showinplugins.value:
+        icon = 'images/plugin-icon.png' if isFHD() else 'images/plugin-icon_sd.png'
+        result.append(PluginDescriptor(name=name, description=description, where=PluginDescriptor.WHERE_PLUGINMENU, icon=icon, fnc=main, needsRestart=False))
+    return result

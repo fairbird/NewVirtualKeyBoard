@@ -1,3 +1,6 @@
+dist/
 *.pyc
 *.pyo
 *.mo
+# compiled translations ship with the plugin (the installer copies usr/ as is)
+!usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/locale/*/LC_MESSAGES/*.mo

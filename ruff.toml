@@ -1,0 +1,9 @@
+# Ruff gate for the CI (.github/workflows/checks.yml): only errors that break
+# the plugin at runtime - syntax errors, undefined names, broken comparisons.
+# Style is not checked on purpose.
+
+# names enigma2 (gettext's _) or Python 2 provide at runtime
+builtins = ["_", "unicode", "basestring", "long", "xrange"]
+
+[lint]
+select = ["E9", "F63", "F7", "F82"]
