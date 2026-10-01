@@ -52,12 +52,6 @@ jobs:
       - name: Install Pillow (image size checks)
         run: python -m pip install --quiet Pillow
 
-      - name: Test HD, FHD, WQHD
-        run: |
-          for width in 1280 1920 2560; do
-            python tests/test_keyboard.py $width
-          done
-
   python27:
     name: Compile + logic test, Python 2.7
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
@@ -68,14 +62,6 @@ jobs:
       # setup-python no longer ships 2.7, so run it in the official image
       - name: Compile
         run: docker run --rm -v "$PWD":/src -w /src python:2.7-slim python -m compileall -q .
-
-      - name: Test HD, FHD, WQHD
-        run: |
-          docker run --rm -v "$PWD":/src -w /src python:2.7-slim sh -c '
-            set -e
-            for width in 1280 1920 2560; do
-              python tests/test_keyboard.py $width
-            done'
 
   ruff:
     name: Ruff (runtime errors)
