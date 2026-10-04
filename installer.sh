@@ -1,7 +1,7 @@
 #!/bin/sh
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
-version="13.9"
+version="14.0"
 description="
 What is NEW :
 - all 218 Windows keyboard layouts, drawn like the real keyboard (ISO 48 keys)
