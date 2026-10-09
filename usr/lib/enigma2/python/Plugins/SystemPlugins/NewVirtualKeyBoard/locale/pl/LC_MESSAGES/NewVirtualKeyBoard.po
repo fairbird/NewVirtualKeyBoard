@@ -1,0 +1,292 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: NewVirtualKeyBoard\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2026-10-09 12:43+0200\n"
+"Last-Translator: Endriu\n"
+"Language-Team: \n"
+"Language: pl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.5\n"
+
+msgid ""
+"\n"
+"Press OK or Exit to abort!"
+msgstr ""
+"\n"
+"Naciśnij OK lub Exit, aby anulować!"
+
+msgid "0-9 - Text input like on a phone, when the input field is selected"
+msgstr ""
+"0-9 - Wprowadzanie tekstu jak w telefonie, po wybraniu pola tekstowego"
+
+msgid "Alt"
+msgstr "Alt"
+
+msgid "Background color"
+msgstr "Kolor tła"
+
+msgid "Black"
+msgstr "Czarny"
+
+msgid "Blue - Shift"
+msgstr "Niebieski – Przełącz"
+
+msgid "Cancel"
+msgstr "Anuluj"
+
+msgid "Cancel execution?"
+msgstr "Anulować wykonywanie?"
+
+msgid "Caps"
+msgstr "Caps"
+
+msgid "Clear"
+msgstr "Wyczyść"
+
+msgid "Clear search history"
+msgstr "Wyczyść historię wyszukiwania"
+
+msgid "Console"
+msgstr "Konsola"
+
+msgid "Ctrl"
+msgstr "Ctrl"
+
+msgid "Default"
+msgstr "Domyślny"
+
+msgid "Delete the search history?"
+msgstr "Usunąć historię wyszukiwania?"
+
+msgid "Do you want to install it now?"
+msgstr "Czy chcesz to teraz zainstalować?"
+
+msgid "Enable/Disable Checking Online Update"
+msgstr "Włącz/wyłącz sprawdzanie aktualizacji online"
+
+msgid "Enter"
+msgstr "Enter"
+
+msgid "Esc"
+msgstr "Esc"
+
+msgid "Execution finished!!"
+msgstr "Wykonanie zakończone!!"
+
+msgid "Execution progress:"
+msgstr "Postęp wykonywania:"
+
+msgid "Exit"
+msgstr "Wyjdź"
+
+msgid "Exit - Close without taking the text"
+msgstr "Wyjdź – zamknij bez pobierania tekstu"
+
+msgid "Failed to download language, try later"
+msgstr "Nie udało się pobrać języka, spróbuj później."
+
+msgid "Fast forward - Insert space"
+msgstr "Szybkie przewijanie do przodu – Wstaw spację"
+
+msgid "Font size (-10 to +30)"
+msgstr "Wielkość czcionki (-10 do +30)"
+
+msgid "Green - Enter: confirm the text and close"
+msgstr "Zielony – Enter: zatwierdź tekst i zamknij"
+
+msgid "Help"
+msgstr "Pomoc"
+
+msgid "Hide"
+msgstr "Ukryj"
+
+msgid "Image virtual keyboard"
+msgstr "Obraz wirtualnej klawiatury"
+
+msgid "Info - Show this screen again"
+msgstr "Informacje – Pokaż ponownie ten ekran"
+
+msgid "Install language"
+msgstr "Zainstaluj język"
+
+msgid "Installing last update, enigma will be started after install"
+msgstr ""
+"Trwa instalacja aktualizacji; po zakończeniu Enigma zostanie uruchomiona "
+"ponownie."
+
+msgid "Keyboard layout selection"
+msgstr "Wybór układu klawiatury"
+
+msgid "Language downloaded successfully, exit from install"
+msgstr "Język pobrany pomyślnie, wyjście z instalacji"
+
+msgid "Language removed from installed package"
+msgstr "Język usunięty z zainstalowanego pakietu"
+
+msgid "Left"
+msgstr "Lewo"
+
+msgid ""
+"Left / Right at the edge of the keyboard - Switch to the suggestions or the "
+"search history"
+msgstr ""
+"Lewa / prawa krawędź klawiatury – przejście do sugestii lub historii "
+"wyszukiwania"
+
+msgid "Loading the keyboard layout %s failed"
+msgstr "Wczytanie układu klawiatury %s nie powiodło się."
+
+msgid "Menu - Settings, install languages, clear the search history"
+msgstr ""
+"Menu – Ustawienia, instalacja języków, czyszczenie historii wyszukiwania"
+
+msgid "Mostly transparent"
+msgstr "W większości przezroczysty"
+
+msgid "New Virtual Keyboard"
+msgstr "Nowa Klawiatura Wirtualna"
+
+msgid ""
+"New Virtual Keyboard - Original code SamSamSam (e2iplayer). Contributors: "
+"mfaraj57 and Fairbird. Skin and amends: KiddaC"
+msgstr ""
+"Nowa klawiatura wirtualna – oryginalny kod: SamSamSam (e2iplayer). "
+"Współtwórcy: mfaraj57 i Fairbird. Skórka i poprawki: KiddaC."
+
+msgid "New Virtual Keyboard Settings"
+msgstr "Nowa Klawiatura Wirtualna ustawienia"
+
+msgid "New version"
+msgstr "Nowa wersja"
+
+msgid "NewVirtualKeyBoard  V %s"
+msgstr "Nowa klawiatura wirtualna V %s"
+
+msgid "NewVirtualKeyBoard setup"
+msgstr "Nowa Klawiatura Wirtualna ustawienia"
+
+msgid "Numeric keypad"
+msgstr "Klawiatura numeryczna"
+
+msgid "Numeric keypad for numbers"
+msgstr "Klawiatura numeryczna do cyfr"
+
+msgid ""
+"OK - Type the selected key / take the selected suggestion or history entry"
+msgstr ""
+"OK – Wpisz wybrany klawisz / wybierz wskazaną sugestię lub wpis z historii."
+
+msgid "OK / GREEN - accept, EXIT - cancel"
+msgstr "OK / ZIELONY – akceptuj, WYJŚCIE – anuluj"
+
+msgid "PVR - Switch between keyboard, suggestions and search history"
+msgstr ""
+"PVR – Przełączanie między klawiaturą, sugestiami a historią wyszukiwania"
+
+msgid "Page Down - Clear input text"
+msgstr "Strona w dół – Wyczyść wprowadzony tekst"
+
+msgid "Page Up - Insert space"
+msgstr "Strona w górę – Wstaw odstęp"
+
+msgid "Press ok to install language"
+msgstr "Naciśnij OK, aby zainstalować język."
+
+msgid "Press ok to remove language"
+msgstr "Naciśnij OK, aby usunąć język."
+
+msgid ""
+"Previous / Next - Switch between keyboard, suggestions and search history"
+msgstr ""
+"Poprzedni / Następny – Przełączanie między klawiaturą, sugestiami a "
+"historią wyszukiwania"
+
+msgid "Red - Backspace"
+msgstr "Czerwony - Krok wstecz"
+
+msgid "Remember last search entry"
+msgstr "Zapamiętaj ostatnie wyszukiwane hasło"
+
+msgid "Restart GUI"
+msgstr "Restart GUI"
+
+msgid "Restart enigma2 to load new settings?"
+msgstr "Zrestartować Enigmę2, aby wczytać nowe ustawienia?"
+
+msgid "Rewind - Clear input text"
+msgstr "Cofnij – Wyczyść wprowadzony tekst"
+
+msgid "Right"
+msgstr "Prawo"
+
+msgid "Save"
+msgstr "Zapisz"
+
+msgid "Search history"
+msgstr "Historia wyszukiwania"
+
+msgid "Search history entries (1-99999)"
+msgstr "Wpisy w historii wyszukiwania (1–99999)"
+
+msgid "Semi-transparent"
+msgstr "Półprzezroczysty"
+
+msgid "Setup virtual keyboard"
+msgstr "Skonfiguruj klawiaturę wirtualną"
+
+msgid "Shift"
+msgstr "Shift"
+
+msgid "Show flags"
+msgstr "Pokaż flagi"
+
+msgid "Show plugin in Plugin Browser"
+msgstr "Pokaż w przeglądarce wtyczek (wymaga restart E2)"
+
+msgid "Show search history"
+msgstr "Pokaż historię wyszukiwania"
+
+msgid "Show suggestions"
+msgstr "Pokaż podpowiedzi"
+
+msgid "Suggestions"
+msgstr "Podpowiedzi"
+
+msgid "Suggestions provider"
+msgstr "Dostawca podpowiedzi"
+
+msgid "Switching the keyboard failed"
+msgstr "Przełączenie klawiatury nie powiodło się."
+
+msgid "Text - Switch language"
+msgstr "Tekst – Zmień język"
+
+msgid "Text field alignment"
+msgstr "Wyrównanie pola tekstowego"
+
+msgid "Text input method-keyboard"
+msgstr "Metoda wprowadzania tekstu – klawiatura"
+
+msgid ""
+"The backup of the image keyboard is missing, the New Virtual Keyboard stays "
+"active."
+msgstr ""
+"Brak kopii zapasowej obrazu klawiatury ; nowa klawiatura wirtualna "
+"pozostaje aktywna."
+
+msgid "Transparent"
+msgstr "Przezroczyste"
+
+msgid "Virtual Keyboard"
+msgstr "Klawiatura wirtualna"
+
+msgid "Yellow - AltGr"
+msgstr "Żółty – AltGr"
+
+msgid "is available"
+msgstr "jest dostępny"
