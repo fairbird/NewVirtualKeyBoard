@@ -40,7 +40,7 @@ def getSuggestionsUrl(provider, text, locale):
         return 'https://v3.sg.media-imdb.com/suggestion/%s/%s.json' % (first, quote(text.lower()))
     # ie/oe=utf-8: else Google answers some languages (ar, ru, el, tr, fa, ...)
     # in a legacy Windows code page
-    return 'https://suggestqueries.google.com/complete/search?output=firefox&ie=utf-8&oe=utf-8&hl=%s&gl=%s%s&q=%s' % (lang, country.lower(), '&ds=yt' if provider == 'youtube' else '', query)
+    return 'https://suggestqueries.google.com/complete/search?client=firefox&ie=utf-8&oe=utf-8&hl=%s&gl=%s%s&q=%s' % (lang, country.lower(), '&ds=yt' if provider == 'youtube' else '', query)
 
 
 def parseSuggestions(provider, raw, contentType=''):

@@ -1133,7 +1133,7 @@ check('PIN masked and limited to maxSize', pin.text == '1234' and labels[-1] == 
 # ==== suggestions: URLs and parsing (offline) =========================================================
 section('suggestions')
 url = suggestions.getSuggestionsUrl
-check('google url: hl language, gl country', url('google', 'a b', 'ru_RU') == 'https://suggestqueries.google.com/complete/search?output=firefox&ie=utf-8&oe=utf-8&hl=ru&gl=ru&q=a%20b', url('google', 'a b', 'ru_RU'))
+check('google url: hl language, gl country', url('google', 'a b', 'ru_RU') == 'https://suggestqueries.google.com/complete/search?client=firefox&ie=utf-8&oe=utf-8&hl=ru&gl=ru&q=a%20b', url('google', 'a b', 'ru_RU'))
 check('google url from a layout locale (de-AT)', '&hl=de&gl=at&' in url('google', 'x', 'de-AT'))
 check('youtube url', '&ds=yt' in url('youtube', 'x', 'de_DE'))
 check('bing url mkt', url('bing', 'x', 'sr-Cyrl-CS').endswith('mkt=sr-CS'))
