@@ -1,17 +1,10 @@
 #!/bin/sh
 ##setup command=wget https://raw.githubusercontent.com/fairbird/NewVirtualKeyBoard/main/installer.sh -O - | /bin/sh
 ###########
-version="14.0"
+version="14.1"
 description="
 What is NEW :
-- all 218 Windows keyboard layouts, drawn like the real keyboard (ISO 48 keys)
-- numeric keypad for number fields, key help for all keys
-- YELLOW = AltGr, BLUE = Shift, TEXT = language, PVR = switch lists
-- MENU opens the settings directly, search history size (1-99999)
-- more settings (font size, alignment, flags, background, suggestions)
-- search suggestions: Google, YouTube, Bing, DuckDuckGo, IMDb
-- translations follow the enigma2 language (gettext)
-- WQHD support, fixes for openATV and Python 2 images
+- Fix Google and YouTube search suggestions API parameters
 "
 
 PLUGINPATH=/usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard
