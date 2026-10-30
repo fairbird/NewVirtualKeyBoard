@@ -31,6 +31,8 @@ if ! wget -q "https://github.com/fairbird/NewVirtualKeyBoard/archive/refs/heads/
 	exit 1
 fi
 
+# BackUp current language before delete old version
+cp -r /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle /tmp/ >/dev/null 2>&1
 # No full wipe: Screens/VirtualKeyBoard.py may be a symlink into the plugin
 # folder and skins/kle/ holds the user's downloaded layouts. Remove only what
 # 13.9 dropped and stale compiled files.
@@ -55,6 +57,11 @@ if ! cp -r "NewVirtualKeyBoard-main/usr" /; then
 	rm -rf "$TMPDIR"
 	exit 1
 fi
+# Restore current language after send new version
+if [ -f '/tmp/kle' ]; then
+	cp -f /tmp/kle/* /usr/lib/enigma2/python/Plugins/SystemPlugins/NewVirtualKeyBoard/skins/kle
+fi
+rm -rf /tmp/kle >/dev/null 2>&1
 cd /tmp
 rm -rf "$TMPDIR"
 
